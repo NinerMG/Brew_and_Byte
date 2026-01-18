@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <div class="hero-section" style="background: white; padding: 60px 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                <h1 class="display-4 fw-bold mb-3" style="color: #667eea;">
+                    <i class="bi bi-laptop"></i> Find Your Perfect Work Spot
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Discover laptop-friendly cafes with WiFi, power outlets, and great coffee
+                </p>
+                <a href="{{ url_for('add_cafe') }}" class="btn btn-lg btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                    <i class="bi bi-plus-circle"></i> Add Your Favorite Cafe
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-panel" style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);">
+                <h5 class="mb-3" style="color: #667eea;">
+                    <i class="bi bi-funnel-fill"></i> Filter Cafes
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-3 col-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="filter-wifi" checked>
+                            <label class="form-check-label" for="filter-wifi">
+                                <i class="bi bi-wifi text-success"></i> WiFi
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="filter-sockets" checked>
+                            <label class="form-check-label" for="filter-sockets">
+                                <i class="bi bi-lightning-charge-fill text-warning"></i> Sockets
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="filter-toilet" checked>
+                            <label class="form-check-label" for="filter-toilet">
+                                <i class="bi bi-door-open-fill text-info"></i> Toilet
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="filter-calls" checked>
+                            <label class="form-check-label" for="filter-calls">
+                                <i class="bi bi-telephone-fill text-primary"></i> Calls OK
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cafes Count -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="text-white text-center">
+                <i class="bi bi-pin-map-fill"></i> 
+                <span id="cafes-count">{{ cafes|length }}</span> Laptop-Friendly Cafe<span id="cafes-plural">{% if cafes|length != 1 %}s{% endif %}</span> Found
+            </h3>
+        </div>
+    </div>
+    
+    <!-- Cafes Grid -->
+    {% if cafes %}
+    <div class="row g-4" id="cafes-grid">
+        {% for cafe in cafes %}
+        <div class="col-md-6 col-lg-4 cafe-card" 
+             data-wifi="{{ cafe.has_wifi|lower }}" 
+             data-sockets="{{ cafe.has_sockets|lower }}" 
+             data-toilet="{{ cafe.has_toilet|lower }}" 
+             data-calls="{{ cafe.can_take_calls|lower }}">
+            <div class="card h-100 shadow-lg border-0" style="border-radius: 15px; overflow: hidden; transition: transform 0.3s;">
+                <!-- Cafe Image -->
+                <img src="{{ cafe.img_url }}" class="card-img-top" alt="{{ cafe.name }}" style="height: 200px; object-fit: cover;">
+                
+                <div class="card-body d-flex flex-column">
+                    <!-- Cafe Name -->
+                    <h5 class="card-title fw-bold mb-2" style="color: #667eea;">
+                        {{ cafe.name }}
+                    </h5>
+                    
+                    <!-- Location -->
+                    <p class="text-muted mb-3">
+                        <i class="bi bi-geo-alt-fill"></i> {{ cafe.location }}
+                    </p>
+                    
+                    <!-- Features Grid -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="feature-badge {% if cafe.has_wifi %}bg-success{% else %}bg-secondary{% endif %} text-white p-2 rounded text-center">
+                                <i class="bi bi-wifi"></i> WiFi
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-badge {% if cafe.has_sockets %}bg-success{% else %}bg-secondary{% endif %} text-white p-2 rounded text-center">
+                                <i class="bi bi-lightning-charge-fill"></i> Sockets
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-badge {% if cafe.has_toilet %}bg-success{% else %}bg-secondary{% endif %} text-white p-2 rounded text-center">
+                                <i class="bi bi-door-open-fill"></i> Toilet
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-badge {% if cafe.can_take_calls %}bg-success{% else %}bg-secondary{% endif %} text-white p-2 rounded text-center">
+                                <i class="bi bi-telephone-fill"></i> Calls OK
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Details -->
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-info text-dark">
+                                <i class="bi bi-people-fill"></i> {{ cafe.seats }} seats
+                            </span>
+                            <span class="badge bg-warning text-dark fw-bold">
+                                <i class="bi bi-cup-hot"></i> {{ cafe.coffee_price }}
+                            </span>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2">
+                            <a href="{{ cafe.map_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-map"></i> View on Map
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- No Cafes Message -->
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info text-center" style="background: white; border: none; border-radius: 15px; padding: 40px;">
+                <i class="bi bi-info-circle display-4 mb-3"></i>
+                <h4>No cafes in database yet!</h4>
+                <p class="mb-3">Be the first to add a laptop-friendly cafe.</p>
+                <a href="{{ url_for('add_cafe') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add First Cafe
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3) !important;
+    }
+    
+    .feature-badge {
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .hero-section {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+    
+    .cafe-card {
+        transition: opacity 0.3s, transform 0.3s;
+    }
+    
+    .cafe-card.hidden {
+        display: none !important;
+    }
+    
+    .filter-panel {
+        animation: slideDown 0.4s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    // Filtrowanie kawiarni
+    function filterCafes() {
+        const wifiFilter = document.getElementById('filter-wifi').checked;
+        const socketsFilter = document.getElementById('filter-sockets').checked;
+        const toiletFilter = document.getElementById('filter-toilet').checked;
+        const callsFilter = document.getElementById('filter-calls').checked;
+        
+        const cafeCards = document.querySelectorAll('.cafe-card');
+        let visibleCount = 0;
+        
+        cafeCards.forEach(card => {
+            const hasWifi = card.dataset.wifi === 'true';
+            const hasSockets = card.dataset.sockets === 'true';
+            const hasToilet = card.dataset.toilet === 'true';
+            const canTakeCalls = card.dataset.calls === 'true';
+            
+            // Pokaż kawiarnie, która spełnia WSZYSTKIE zaznaczone filtry
+            const showCard = (!wifiFilter || hasWifi) &&
+                            (!socketsFilter || hasSockets) &&
+                            (!toiletFilter || hasToilet) &&
+                            (!callsFilter || canTakeCalls);
+            
+            if (showCard) {
+                card.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+        
+        // Aktualizuj licznik
+        document.getElementById('cafes-count').textContent = visibleCount;
+        document.getElementById('cafes-plural').textContent = visibleCount !== 1 ? 's' : '';
+    }
+    
+    // Dodaj event listenery do wszystkich filtrów
+    document.addEventListener('DOMContentLoaded', function() {
+        const filters = ['filter-wifi', 'filter-sockets', 'filter-toilet', 'filter-calls'];
+        filters.forEach(filterId => {
+            document.getElementById(filterId).addEventListener('change', filterCafes);
+        });
+    });
+</script     opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
