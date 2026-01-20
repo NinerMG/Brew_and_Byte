@@ -138,6 +138,11 @@
                             <a href="{{ cafe.map_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-map"></i> View on Map
                             </a>
+                            <a href="{{ url_for('delete_cafe', cafe_id=cafe.id) }}" 
+                               class="btn btn-outline-danger btn-sm"
+                               onclick="return confirm('Are you sure you want to delete {{ cafe.name }}?')">
+                                <i class="bi bi-trash"></i> Delete Cafe
+                            </a>
                         </div>
                     </div>
                 </div>
