@@ -1,224 +1,101 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Add New Cafe - Brew & Byte{% endblock %}
+{% block title %}Add New Cafe{% endblock %}
 
 {% block content %}
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Form Header -->
-            <div class="text-center mb-4">
-                <div class="form-header" style="background: white; padding: 40px; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.1);">
-                    <h1 class="display-5 fw-bold mb-3" style="color: #667eea;">
-                        <i class="bi bi-cup-hot-fill"></i> Add a New Cafe
-                    </h1>
-                    <p class="lead text-muted">
-                        Share your favorite laptop-friendly spot with the community!
-                    </p>
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="display-4 mb-4">Add a New Cafe</h1>
+
+            <form method="POST" action="{{ url_for('add_cafe') }}">
+
+                <!-- Cafe Name -->
+                <div class="mb-3">
+                    <label for="name" class="form-label">Cafe Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
                 </div>
-            </div>
-            
-            <!-- Form Card -->
-            <div class="card border-0 shadow-lg" style="border-radius: 0 0 20px 20px;">
-                <div class="card-body p-5">
-                    <form method="POST" action="{{ url_for('add_cafe') }}" novalidate>
-                        {{ form.hidden_tag() }}
-                        
-                        <!-- Cafe Name -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold" style="color: #667eea;">
-                                <i class="bi bi-shop"></i> Cafe Name
-                            </label>
-                            {{ form.name(class="form-control form-control-lg", placeholder="e.g. Coffee Lab") }}
-                            {% if form.name.errors %}
-                                <div class="text-danger mt-2">
-                                    {% for error in form.name.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Location -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold" style="color: #667eea;">
-                                <i class="bi bi-geo-alt-fill"></i> Location
-                            </label>
-                            {{ form.location(class="form-control form-control-lg", placeholder="e.g. Shoreditch, London") }}
-                            {% if form.location.errors %}
-                                <div class="text-danger mt-2">
-                                    {% for error in form.location.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Map URL -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold" style="color: #667eea;">
-                                <i class="bi bi-map"></i> Google Maps URL
-                            </label>
-                            {{ form.map_url(class="form-control", placeholder="https://maps.google.com/...") }}
-                            <small class="form-text text-muted">
-                                Right-click on Google Maps and select "Copy link"
-                            </small>
-                            {% if form.map_url.errors %}
-                                <div class="text-danger mt-2">
-                                    {% for error in form.map_url.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Image URL -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold" style="color: #667eea;">
-                                <i class="bi bi-image"></i> Image URL
-                            </label>
-                            {{ form.img_url(class="form-control", placeholder="https://example.com/image.jpg") }}
-                            <small class="form-text text-muted">
-                                Direct link to cafe image (imgur, unsplash, etc.)
-                            </small>
-                            {% if form.img_url.errors %}
-                                <div class="text-danger mt-2">
-                                    {% for error in form.img_url.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <!-- Seats & Coffee Price Row -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold" style="color: #667eea;">
-                                    <i class="bi bi-people-fill"></i> Number of Seats
-                                </label>
-                                {{ form.seats(class="form-select form-select-lg") }}
-                                {% if form.seats.errors %}
-                                    <div class="text-danger mt-2">
-                                        {% for error in form.seats.errors %}
-                                            <small>{{ error }}</small>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold" style="color: #667eea;">
-                                    <i class="bi bi-currency-pound"></i> Coffee Price
-                                </label>
-                                {{ form.coffee_price(class="form-control form-control-lg", placeholder="e.g. £2.50") }}
-                                {% if form.coffee_price.errors %}
-                                    <div class="text-danger mt-2">
-                                        {% for error in form.coffee_price.errors %}
-                                            <small>{{ error }}</small>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <!-- Amenities Section -->
-                        <div class="mb-4">
-                            <h5 class="mb-3 fw-bold" style="color: #667eea;">
-                                <i class="bi bi-list-check"></i> Amenities
-                            </h5>
-                            <div class="amenities-grid" style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="form-check form-switch">
-                                            {{ form.has_wifi(class="form-check-input", id="has_wifi", checked=True) }}
-                                            <label class="form-check-label fw-semibold" for="has_wifi">
-                                                <i class="bi bi-wifi text-primary"></i> Has WiFi
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check form-switch">
-                                            {{ form.has_sockets(class="form-check-input", id="has_sockets", checked=True) }}
-                                            <label class="form-check-label fw-semibold" for="has_sockets">
-                                                <i class="bi bi-lightning-charge text-warning"></i> Has Power Sockets
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check form-switch">
-                                            {{ form.has_toilet(class="form-check-input", id="has_toilet", checked=True) }}
-                                            <label class="form-check-label fw-semibold" for="has_toilet">
-                                                <i class="bi bi-door-open text-info"></i> Has Toilet
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check form-switch">
-                                            {{ form.can_take_calls(class="form-check-input", id="can_take_calls") }}
-                                            <label class="form-check-label fw-semibold" for="can_take_calls">
-                                                <i class="bi bi-telephone text-success"></i> Can Take Calls
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Submit Buttons -->
-                        <div class="d-grid gap-2 mt-5">
-                            {{ form.submit(class="btn btn-lg btn-primary fw-bold", style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 15px;") }}
-                            <a href="{{ url_for('home') }}" class="btn btn-lg btn-outline-secondary">
-                                <i class="bi bi-x-circle"></i> Cancel
-                            </a>
-                        </div>
-                    </form>
+
+                <!-- Location -->
+                <div class="mb-3">
+                    <label for="loc" class="form-label">Location (e.g., Peckham, London)</label>
+                    <input type="text" class="form-control" id="loc" name="loc" required>
                 </div>
-            </div>
+
+                <!-- Map URL -->
+                <div class="mb-3">
+                    <label for="map_url" class="form-label">Map URL (Google Maps Link)</label>
+                    <input type="url" class="form-control" id="map_url" name="map_url" required>
+                </div>
+
+                <!-- Image URL -->
+                <div class="mb-3">
+                    <label for="img_url" class="form-label">Image URL</label>
+                    <input type="url" class="form-control" id="img_url" name="img_url" required>
+                </div>
+
+                <!-- Number of Seats -->
+                <div class="mb-3">
+                    <label for="seats" class="form-label">Number of Seats</label>
+                    <select class="form-select" id="seats" name="seats" required>
+                        <option value="">Choose...</option>
+                        <option value="0-10">0-10</option>
+                        <option value="10-20">10-20</option>
+                        <option value="20-30">20-30</option>
+                        <option value="30-40">30-40</option>
+                        <option value="40-50">40-50</option>
+                        <option value="50+">50+</option>
+                    </select>
+                </div>
+
+                <!-- Coffee Price -->
+                <div class="mb-3">
+                    <label for="coffee_price" class="form-label">Coffee Price (e.g., £2.50)</label>
+                    <input type="text" class="form-control" id="coffee_price" name="coffee_price" required>
+                </div>
+
+                <!-- Checkboxes -->
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="wifi" name="wifi" checked>
+                        <label class="form-check-label" for="wifi">
+                            Has WiFi
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="sockets" name="sockets" checked>
+                        <label class="form-check-label" for="sockets">
+                            Has Power Sockets
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="toilet" name="toilet" checked>
+                        <label class="form-check-label" for="toilet">
+                            Has Toilet
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="calls" name="calls">
+                        <label class="form-check-label" for="calls">
+                            Can Take Calls
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary btn-lg">Add Cafe</button>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary btn-lg">Cancel</a>
+            </form>
         </div>
     </div>
 </div>
-
-<style>
-    .form-header {
-        animation: slideDown 0.5s ease-out;
-    }
-    
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .form-control:focus, .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-    }
-    
-    .form-check-input:checked {
-        background-color: #667eea;
-        border-color: #667eea;
-    }
-    
-    .form-check-input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-    }
-    
-    .card {
-        animation: fadeIn 0.6s ease-out;
-    }
-    
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-</style>
 {% endblock %}

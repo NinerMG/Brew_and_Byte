@@ -187,6 +187,10 @@
             transform: translateY(30px);
         }
         to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
     
     .cafe-card {
         transition: opacity 0.3s, transform 0.3s;
@@ -215,19 +219,25 @@
 <script>
     // Filtrowanie kawiarni
     function filterCafes() {
+        console.log('filterCafes() called'); // DEBUG
+        
         const wifiFilter = document.getElementById('filter-wifi').checked;
         const socketsFilter = document.getElementById('filter-sockets').checked;
         const toiletFilter = document.getElementById('filter-toilet').checked;
         const callsFilter = document.getElementById('filter-calls').checked;
         
+        console.log('Filters:', {wifi: wifiFilter, sockets: socketsFilter, toilet: toiletFilter, calls: callsFilter}); // DEBUG
+        
         const cafeCards = document.querySelectorAll('.cafe-card');
+        console.log('Found cards:', cafeCards.length); // DEBUG
+        
         let visibleCount = 0;
         
         cafeCards.forEach(card => {
-            const hasWifi = card.dataset.wifi === 'true';
-            const hasSockets = card.dataset.sockets === 'true';
-            const hasToilet = card.dataset.toilet === 'true';
-            const canTakeCalls = card.dataset.calls === 'true';
+            const hasWifi = card.dataset.wifi === 'true' || card.dataset.wifi === '1';
+            const hasSockets = card.dataset.sockets === 'true' || card.dataset.sockets === '1';
+            const hasToilet = card.dataset.toilet === 'true' || card.dataset.toilet === '1';
+            const canTakeCalls = card.dataset.calls === 'true' || card.dataset.calls === '1';
             
             // Pokaż kawiarnie, która spełnia WSZYSTKIE zaznaczone filtry
             const showCard = (!wifiFilter || hasWifi) &&
@@ -235,12 +245,16 @@
                             (!toiletFilter || hasToilet) &&
                             (!callsFilter || canTakeCalls);
             
+            console.log('Cafe:', card.querySelector('.card-title')?.textContent, 'showCard:', showCard, 'classes before:', card.className); // DEBUG
+            
             if (showCard) {
                 card.classList.remove('hidden');
                 visibleCount++;
             } else {
                 card.classList.add('hidden');
             }
+            
+            console.log('classes after:', card.className); // DEBUG
         });
         
         // Aktualizuj licznik
@@ -250,14 +264,15 @@
     
     // Dodaj event listenery do wszystkich filtrów
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOMContentLoaded - initializing filters'); // DEBUG
         const filters = ['filter-wifi', 'filter-sockets', 'filter-toilet', 'filter-calls'];
         filters.forEach(filterId => {
-            document.getElementById(filterId).addEventListener('change', filterCafes);
+            const element = document.getElementById(filterId);
+            console.log('Adding listener to:', filterId, element); // DEBUG
+            if (element) {
+                element.addEventListener('change', filterCafes);
+            }
         });
     });
-</script     opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
+</script>
 {% endblock %}
