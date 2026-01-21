@@ -142,6 +142,7 @@ def home():
     return render_template("index.html", cafes=all_cafes)
 
 @app.route("/add", methods=["GET", "POST"])
+@login_required
 def add_cafe():
     form = CafeForm()
     if request.method == "POST":
@@ -164,6 +165,7 @@ def add_cafe():
         return render_template("add_cafe.html", form=form)
 
 @app.route("/delete/<int:cafe_id>")
+@login_required
 def delete_cafe(cafe_id):
     cafe_to_delete = db.session.get(Cafe, cafe_id)
     if cafe_to_delete:
