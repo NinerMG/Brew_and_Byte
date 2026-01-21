@@ -62,13 +62,14 @@ class Cafe(db.Model):
     has_sockets: Mapped[bool] = mapped_column(Boolean, nullable=False)
     can_take_calls: Mapped[bool] = mapped_column(Boolean, nullable=False)
     coffee_price: Mapped[str] = mapped_column(String(250), nullable=True)
+    user_id: Mapped[int] = mapped_column(Integer,db.ForeignKey('user.id'), nullable=False)
 
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, user_id)
 
 class CafeForm(FlaskForm):
-    name = SubmitField('Cafe Name', validators=[DataRequired()])
+    name = StringField('Cafe Name', validators=[DataRequired()])
     location = StringField('Location', validators=[DataRequired()])
     map_url = StringField('Map URL', validators=[DataRequired(), URL()])
     img_url = StringField('Image URL', validators=[DataRequired(), URL()])
@@ -112,9 +113,9 @@ def register():
 
     form = RegisterForm()
     if form.validate_on_submit():
-        exsisitng_user = db.session.query(User).filter_by(email=form.email.data).first()
-        if exsisitng_user:
-            flash('Ten adres email jest już zarejestrowany. Użyj innego')
+        existing_user = db.session.query(User).filter_by(email=form.email.data).first()
+        if existing_user:
+            flash('Ten adres email jest już zarejestrowany. Użyj innego', 'danger')
             return redirect(url_for('register'))
 
         hashed_password = generate_password_hash(
@@ -158,9 +159,15 @@ def add_cafe():
             seats=request.form.get("seats"),
             coffee_price=request.form.get("coffee_price")
         )
-        db.session.add(new_cafe)
-        db.session.commit()
-        return redirect(url_for('home'))
+        try:
+            db.session.add(new_cafe)
+            db.session.commit()
+            flash('Kawiarnia dodana pomyślnie', 'success')
+            return redirect(url_for('home'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Błąd podczas dodawania kawiarni: {str(e)}', 'danger')
+            return redirect(url_for('add_cafe'), form=form)
     else:
         return render_template("add_cafe.html", form=form)
 
@@ -169,8 +176,16 @@ def add_cafe():
 def delete_cafe(cafe_id):
     cafe_to_delete = db.session.get(Cafe, cafe_id)
     if cafe_to_delete:
-        db.session.delete(cafe_to_delete)
-        db.session.commit()
+        try:
+            db.session.delete(cafe_to_delete)
+            db.session.commit()
+            flash('Kawiarnia usunięta!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Błąd podczas usuwania: {str(e)}', 'danger')
+    else:
+        flash('Nie znaleziono kawiarni!', 'danger')
+
     return redirect(url_for('home'))
 
 
