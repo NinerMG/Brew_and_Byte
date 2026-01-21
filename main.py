@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request,jsonify, url_for, redirect, flash
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String, Boolean
 from flask_wtf import FlaskForm
@@ -49,6 +49,7 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(200), nullable=False)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
+    cafes = relationship('Cafe', backref='owner', lazy=True)
 
 class Cafe(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -66,7 +67,7 @@ class Cafe(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, user_id)
+    return db.session.get(User, int(user_id))
 
 class CafeForm(FlaskForm):
     name = StringField('Cafe Name', validators=[DataRequired()])
@@ -129,12 +130,18 @@ def register():
             name=form.name.data
         )
 
-        db.session.add(new_user)
-        db.session.commit()
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+            flash(f"Witaj {new_user.name}! Twoje konto zostało utworzone", 'success')
+            return redirect(url_for('home'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Błąd podczas rejestracji: {str(e)}', 'danger')
+            return redirect(url_for('register'))
 
-        login_user(new_user)
-        flash(f"Witaj {new_user.name}! Twoje konto zostało utworzone", 'success')
-        return redirect(url_for('home'))
+
     return render_template('register.html', form=form)
 
 @app.route("/")
@@ -146,18 +153,19 @@ def home():
 @login_required
 def add_cafe():
     form = CafeForm()
-    if request.method == "POST":
+    if form.validate_on_submit():
         new_cafe = Cafe(
-            name=request.form.get("name") or request.form.get("cafe_name"),
-            map_url=request.form.get("map_url"),
-            img_url=request.form.get("img_url"),
-            location=request.form.get("loc"),
-            has_sockets=bool(request.form.get("sockets")),
-            has_toilet=bool(request.form.get("toilet")),
-            has_wifi=bool(request.form.get("wifi")),
-            can_take_calls=bool(request.form.get("calls")),
-            seats=request.form.get("seats"),
-            coffee_price=request.form.get("coffee_price")
+            name=form.name.data,
+            map_url=form.map_url.data,
+            img_url=form.img_url.data,
+            location=form.location.data,
+            has_sockets=form.has_sockets.data,
+            has_toilet=form.has_toilet.data,
+            has_wifi=form.has_wifi.data,
+            can_take_calls=form.can_take_calls.data,
+            seats=form.seats.data,
+            coffee_price=form.coffee_price.data,
+            user_id=current_user.id
         )
         try:
             db.session.add(new_cafe)
@@ -167,9 +175,8 @@ def add_cafe():
         except Exception as e:
             db.session.rollback()
             flash(f'Błąd podczas dodawania kawiarni: {str(e)}', 'danger')
-            return redirect(url_for('add_cafe'), form=form)
-    else:
-        return render_template("add_cafe.html", form=form)
+
+    return render_template("add_cafe.html", form=form)
 
 @app.route("/delete/<int:cafe_id>")
 @login_required
