@@ -12,6 +12,23 @@
                 <p class="lead text-muted mb-4">
                     Discover laptop-friendly cafes with WiFi, power outlets, and great coffee
                 </p>
+                {% if current_user is defined and current_user.is_authenticated %}
+                <a href="{{ url_for('add_cafe') }}" class="btn btn-lg btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                    <i class="bi bi-plus-circle"></i> Add Your Favorite Cafe
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-lg btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                    <i class="bi bi-box-arrow-in-right"></i> Login to Add Cafes
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+                    <i class="bi bi-laptop"></i> Find Your Perfect Work Spot
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Discover laptop-friendly cafes with WiFi, power outlets, and great coffee
+                </p>
                 <a href="{{ url_for('add_cafe') }}" class="btn btn-lg btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
                     <i class="bi bi-plus-circle"></i> Add Your Favorite Cafe
                 </a>
@@ -138,11 +155,13 @@
                             <a href="{{ cafe.map_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-map"></i> View on Map
                             </a>
+                            {% if current_user is defined and current_user.is_authenticated %}
                             <a href="{{ url_for('delete_cafe', cafe_id=cafe.id) }}" 
                                class="btn btn-outline-danger btn-sm"
                                onclick="return confirm('Are you sure you want to delete {{ cafe.name }}?')">
                                 <i class="bi bi-trash"></i> Delete Cafe
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -158,9 +177,15 @@
                 <i class="bi bi-info-circle display-4 mb-3"></i>
                 <h4>No cafes in database yet!</h4>
                 <p class="mb-3">Be the first to add a laptop-friendly cafe.</p>
+                {% if current_user is defined and current_user.is_authenticated %}
                 <a href="{{ url_for('add_cafe') }}" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> Add First Cafe
                 </a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-in-right"></i> Login to Add Cafes
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>

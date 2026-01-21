@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Brew & Byte{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        max-width: 500px;
+        margin: 50px auto;
+    }
+    
+    .register-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .register-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .register-header i {
+        font-size: 4rem;
+        color: #667eea;
+        margin-bottom: 15px;
+    }
+    
+    .register-header h2 {
+        color: #333;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .register-header p {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .input-group-text {
+        background: #f8f9fa;
+        border: 2px solid #e0e0e0;
+        border-right: none;
+        border-radius: 10px 0 0 10px;
+    }
+    
+    .input-group .form-control {
+        border-left: none;
+        border-radius: 0 10px 10px 0;
+    }
+    
+    .btn-register {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: transform 0.2s;
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .divider {
+        text-align: center;
+        margin: 25px 0;
+        position: relative;
+    }
+    
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e0e0e0;
+    }
+    
+    .divider span {
+        background: white;
+        padding: 0 15px;
+        position: relative;
+        color: #999;
+        font-size: 0.9rem;
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .login-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+    
+    .password-strength {
+        height: 5px;
+        border-radius: 3px;
+        margin-top: 5px;
+        transition: all 0.3s;
+    }
+    
+    .strength-weak {
+        background: #dc3545;
+        width: 33%;
+    }
+    
+    .strength-medium {
+        background: #ffc107;
+        width: 66%;
+    }
+    
+    .strength-strong {
+        background: #28a745;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <i class="bi bi-person-plus-fill"></i>
+                <h2>Create Account</h2>
+                <p>Join our community of cafe enthusiasts</p>
+            </div>
+            
+            {% if form %}
+            <form method="POST" action="{{ url_for('register') }}">
+                {{ form.hidden_tag() }}
+                
+                <!-- Name Field -->
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-person-fill"></i>
+                        </span>
+                        {{ form.name(class="form-control", placeholder="John Doe", id="name") }}
+                    </div>
+                    {% if form.name.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-envelope-fill"></i>
+                        </span>
+                        {{ form.email(class="form-control", placeholder="your@email.com", id="email") }}
+                    </div>
+                    {% if form.email.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Password Field -->
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock-fill"></i>
+                        </span>
+                        {{ form.password(class="form-control", placeholder="Create a strong password", id="password") }}
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="text-muted">Minimum 8 characters</small>
+                </div>
+                
+                <!-- Confirm Password Field -->
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock-check-fill"></i>
+                        </span>
+                        {{ form.confirm_password(class="form-control", placeholder="Confirm your password", id="confirm_password") }}
+                    </div>
+                    {% if form.confirm_password.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.confirm_password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Terms and Conditions -->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="terms" required>
+                    <label class="form-check-label small" for="terms">
+                        I agree to the <a href="#" class="text-decoration-none">Terms & Conditions</a>
+                    </label>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    {{ form.submit(class="btn btn-primary btn-register") }}
+                </div>
+            </form>
+            {% else %}
+            <!-- TYMCZASOWA WERSJA - Zastąp pełną implementacją -->
+            <div class="alert alert-info">
+                <h5><i class="bi bi-info-circle"></i> Funkcja rejestracji nie jest jeszcze zaimplementowana</h5>
+                <p class="mb-0">Zobacz plik <code>IMPLEMENTATION_STEPS.py</code> aby zaimplementować pełną funkcjonalność rejestracji.</p>
+            </div>
+            {% endif %}
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <div class="login-link">
+                <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

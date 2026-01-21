@@ -83,11 +83,34 @@
                             <i class="bi bi-house-fill"></i> Home
                         </a>
                     </li>
+                    {% if current_user is defined and current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('add_cafe') }}">
                             <i class="bi bi-plus-circle-fill"></i> Add Cafe
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-person-circle"></i> {{ current_user.name }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">
+                            <i class="bi bi-person-plus-fill"></i> Register
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

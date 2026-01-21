@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Brew & Byte{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        max-width: 450px;
+        margin: 50px auto;
+    }
+    
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .login-header i {
+        font-size: 4rem;
+        color: #667eea;
+        margin-bottom: 15px;
+    }
+    
+    .login-header h2 {
+        color: #333;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .login-header p {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .input-group-text {
+        background: #f8f9fa;
+        border: 2px solid #e0e0e0;
+        border-right: none;
+        border-radius: 10px 0 0 10px;
+    }
+    
+    .input-group .form-control {
+        border-left: none;
+        border-radius: 0 10px 10px 0;
+    }
+    
+    .btn-login {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: transform 0.2s;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .divider {
+        text-align: center;
+        margin: 25px 0;
+        position: relative;
+    }
+    
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e0e0e0;
+    }
+    
+    .divider span {
+        background: white;
+        padding: 0 15px;
+        position: relative;
+        color: #999;
+        font-size: 0.9rem;
+    }
+    
+    .register-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .register-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .register-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="bi bi-cup-hot-fill"></i>
+                <h2>Welcome Back!</h2>
+                <p>Login to discover laptop-friendly cafes</p>
+            </div>
+            
+            {% if form %}
+            <form method="POST" action="{{ url_for('login') }}">
+                {{ form.hidden_tag() }}
+                
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-envelope-fill"></i>
+                        </span>
+                        {{ form.email(class="form-control", placeholder="your@email.com", id="email") }}
+                    </div>
+                    {% if form.email.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Password Field -->
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock-fill"></i>
+                        </span>
+                        {{ form.password(class="form-control", placeholder="Enter your password", id="password") }}
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Remember Me Checkbox -->
+                <div class="mb-3 form-check">
+                    {{ form.remember(class="form-check-input", id="remember") }}
+                    <label class="form-check-label" for="remember">
+                        Remember me
+                    </label>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    {{ form.submit(class="btn btn-primary btn-login") }}
+                </div>
+            </form>
+            {% else %}
+            <!-- TYMCZASOWA WERSJA - Zastąp pełną implementacją -->
+            <div class="alert alert-info">
+                <h5><i class="bi bi-info-circle"></i> Funkcja logowania nie jest jeszcze zaimplementowana</h5>
+                <p class="mb-0">Zobacz plik <code>IMPLEMENTATION_STEPS.py</code> aby zaimplementować pełną funkcjonalność logowania.</p>
+            </div>
+            {% endif %}
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <div class="register-link">
+                <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
