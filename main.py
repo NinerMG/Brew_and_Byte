@@ -45,29 +45,35 @@ def get_locale():
 
 babel.init_app(app, locale_selector=get_locale)
 
-# Make gettext available in templates
 @app.context_processor
 def inject_gettext():
+    """Udostępnia funkcję tłumaczenia gettext w szablonach Jinja2."""
     return dict(_=gettext)
 
 
-#Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = "Musisz być zalogowany, aby uzyskać dostęp do tej strony."
 login_manager.login_message_category = 'info'
 
-# create database
 class Base(DeclarativeBase):
     pass
 
-# connect to Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
 class User(UserMixin, db.Model):
+    """Model użytkownika z możliwością dodawania kawiarni.
+    
+    Attributes:
+        id: Unikalny identyfikator użytkownika
+        email: Adres email (unikalny)
+        password: Zahashowane hasło
+        name: Imię i nazwisko użytkownika
+        cafes: Relacja do dodanych kawiarni
+    """
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -75,6 +81,22 @@ class User(UserMixin, db.Model):
     cafes = relationship('Cafe', backref='owner', lazy=True)
 
 class Cafe(db.Model):
+    """Model kawiarni z informacjami o udogodnieniach dla pracy zdalnej.
+    
+    Attributes:
+        id: Unikalny identyfikator kawiarni
+        name: Nazwa kawiarni
+        map_url: Link do lokalizacji na mapie
+        img_url: URL zdjęcia kawiarni
+        location: Adres/lokalizacja
+        seats: Liczba miejsc siedzących
+        has_toilet: Czy ma toaletę
+        has_wifi: Czy ma WiFi
+        has_sockets: Czy ma gniazdka elektryczne
+        can_take_calls: Czy można odbierać rozmowy telefoniczne
+        coffee_price: Cena kawy
+        user_id: ID użytkownika który dodał kawiarnię
+    """
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
     map_url: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -90,9 +112,18 @@ class Cafe(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
+    """Funkcja callback do ładowania użytkownika z sesji dla Flask-Login.
+    
+    Args:
+        user_id: ID użytkownika do załadowania
+        
+    Returns:
+        User: Obiekt użytkownika lub None
+    """
     return db.session.get(User, int(user_id))
 
 class CafeForm(FlaskForm):
+    """Formularz do dodawania i edycji kawiarni."""
     name = StringField(_l('Cafe Name'), validators=[DataRequired()])
     location = StringField(_l('Location'), validators=[DataRequired()])
     map_url = StringField(_l('Map URL'), validators=[DataRequired(), URL()])
@@ -109,12 +140,14 @@ class CafeForm(FlaskForm):
     submit = SubmitField(_l('Save'))
 
 class LoginForm(FlaskForm):
+    """Formularz logowania użytkownika."""
     email = StringField(_l('Email'), validators=[DataRequired(), Email()])
     password = PasswordField(_l('Password'), validators=[DataRequired()])
     remember = BooleanField(_l('Remember Me'))
     submit = SubmitField(_l('Login'))
 
 class RegisterForm(FlaskForm):
+    """Formularz rejestracji nowego użytkownika."""
     name = StringField(_l('Name'), validators=[DataRequired()])
     email = StringField(_l('Email'), validators=[DataRequired(), Email()])
     password = PasswordField(_l('Password'), validators=[
@@ -132,6 +165,12 @@ with app.app_context():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """Rejestracja nowego użytkownika z walidacją i hashowaniem hasła.
+    
+    Returns:
+        Przekierowanie do strony głównej po udanej rejestracji
+        lub renderowanie formularza rejestracji
+    """
     if current_user.is_authenticated:
         return redirect(url_for('home'))
 
@@ -169,12 +208,23 @@ def register():
 
 @app.route("/")
 def home():
+    """Strona główna wyświetlająca wszystkie kawiarnie.
+    
+    Returns:
+        Renderowana strona z listą kawiarni
+    """
     all_cafes = db.session.query(Cafe).all()
     return render_template("index.html", cafes=all_cafes)
 
 @app.route("/add", methods=["GET", "POST"])
 @login_required
 def add_cafe():
+    """Dodawanie nowej kawiarni do bazy danych (wymaga logowania).
+    
+    Returns:
+        Przekierowanie do strony głównej po dodaniu kawiarni
+        lub renderowanie formularza dodawania
+    """
     form = CafeForm()
     if form.validate_on_submit():
         new_cafe = Cafe(
@@ -204,6 +254,14 @@ def add_cafe():
 @app.route("/delete/<int:cafe_id>")
 @login_required
 def delete_cafe(cafe_id):
+    """Usuwanie kawiarni z bazy danych (wymaga logowania).
+    
+    Args:
+        cafe_id: ID kawiarni do usunięcia
+        
+    Returns:
+        Przekierowanie do strony głównej
+    """
     cafe_to_delete = db.session.get(Cafe, cafe_id)
     if cafe_to_delete:
         try:
@@ -222,6 +280,15 @@ def delete_cafe(cafe_id):
 @app.route('/update/cafe/<int:cafe_id>', methods=['GET', 'POST'])
 @login_required
 def update_cafe(cafe_id):
+    """Edycja istniejącej kawiarni (wymaga logowania).
+    
+    Args:
+        cafe_id: ID kawiarni do edycji
+        
+    Returns:
+        Przekierowanie do strony głównej po aktualizacji
+        lub renderowanie formularza edycji
+    """
     cafe_to_update = Cafe.query.get_or_404(cafe_id)
     form = CafeForm(obj=cafe_to_update)
 
@@ -250,6 +317,12 @@ def update_cafe(cafe_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """Logowanie użytkownika z weryfikacją hasła.
+    
+    Returns:
+        Przekierowanie do strony głównej po udanym logowaniu
+        lub renderowanie formularza logowania
+    """
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = LoginForm()
@@ -270,6 +343,11 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    """Wylogowanie zalogowanego użytkownika.
+    
+    Returns:
+        Przekierowanie do strony głównej
+    """
     logout_user()
     flash('Zostałeś wylogowany', 'info')
     return redirect(url_for('home'))
@@ -277,7 +355,14 @@ def logout():
 
 @app.route('/set-language/<language>')
 def set_language(language):
-    """Switch the application language."""
+    """Zmiana języka aplikacji (PL/EN).
+    
+    Args:
+        language: Kod języka ('pl' lub 'en')
+        
+    Returns:
+        Przekierowanie do poprzedniej strony lub strony głównej
+    """
     if language in app.config['BABEL_SUPPORTED_LOCALES']:
         session['language'] = language
         flash(gettext('Language changed successfully!'), 'success')
@@ -287,5 +372,3 @@ def set_language(language):
 if __name__ == '__main__':
     app.run(debug=True)
 
-# TODO
-# update cafe
