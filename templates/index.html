@@ -5,33 +5,22 @@
     <!-- Hero Section -->
     <div class="row mb-5">
         <div class="col-12 text-center">
-            <div class="hero-section" style="background: white; padding: 60px 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-                <h1 class="display-4 fw-bold mb-3" style="color: #667eea;">
-                    <i class="bi bi-laptop"></i> Find Your Perfect Work Spot
+            <div class="hero-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 80px 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                <h1 class="display-3 fw-bold mb-3" style="color: white;">
+                    ☕ Twoja Kawiarnia. Twoje Biuro.
                 </h1>
-                <p class="lead text-muted mb-4">
-                    Discover laptop-friendly cafes with WiFi, power outlets, and great coffee
+                <p class="lead mb-4" style="color: rgba(255,255,255,0.9); font-size: 1.3rem;">
+                    Znajdź idealne miejsce do pracy z WiFi, gniazdkami i dobrą kawą w Twoim mieście
                 </p>
                 {% if current_user is defined and current_user.is_authenticated %}
-                <a href="{{ url_for('add_cafe') }}" class="btn btn-lg btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
-                    <i class="bi bi-plus-circle"></i> Add Your Favorite Cafe
+                <a href="{{ url_for('add_cafe') }}" class="btn btn-lg btn-light px-5 py-3" style="border-radius: 50px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                    <i class="bi bi-plus-circle"></i> Dodaj Kawiarnię
                 </a>
                 {% else %}
-                <a href="{{ url_for('login') }}" class="btn btn-lg btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
-                    <i class="bi bi-box-arrow-in-right"></i> Login to Add Cafes
+                <a href="{{ url_for('login') }}" class="btn btn-lg btn-light px-5 py-3" style="border-radius: 50px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                    <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
                 </a>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-                    <i class="bi bi-laptop"></i> Find Your Perfect Work Spot
-                </h1>
-                <p class="lead text-muted mb-4">
-                    Discover laptop-friendly cafes with WiFi, power outlets, and great coffee
-                </p>
-                <a href="{{ url_for('add_cafe') }}" class="btn btn-lg btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
-                    <i class="bi bi-plus-circle"></i> Add Your Favorite Cafe
-                </a>
             </div>
         </div>
     </div>
@@ -156,10 +145,14 @@
                                 <i class="bi bi-map"></i> View on Map
                             </a>
                             {% if current_user is defined and current_user.is_authenticated %}
+                            <a href="{{ url_for('update_cafe', cafe_id=cafe.id) }}" 
+                               class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Edytuj
+                            </a>
                             <a href="{{ url_for('delete_cafe', cafe_id=cafe.id) }}" 
-                               class="btn btn-outline-danger btn-sm"
-                               onclick="return confirm('Are you sure you want to delete {{ cafe.name }}?')">
-                                <i class="bi bi-trash"></i> Delete Cafe
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Czy na pewno chcesz usunąć tę kawiarnię?')">
+                                <i class="fas fa-trash"></i> Usuń
                             </a>
                             {% endif %}
                         </div>

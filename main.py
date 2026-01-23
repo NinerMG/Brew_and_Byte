@@ -83,7 +83,7 @@ class CafeForm(FlaskForm):
     has_sockets = BooleanField('Has Power Sockets', default=True)
     has_toilet = BooleanField('Has Toilet', default=True)
     can_take_calls = BooleanField('Can Take Calls', default=False)
-    submit = SubmitField('Add Cafe')
+    submit = SubmitField('Zapisz')  # Zmień na uniwersalny tekst
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -196,6 +196,35 @@ def delete_cafe(cafe_id):
     return redirect(url_for('home'))
 
 
+@app.route('/update/cafe/<int:cafe_id>', methods=['GET', 'POST'])
+@login_required
+def update_cafe(cafe_id):
+    cafe_to_update = Cafe.query.get_or_404(cafe_id)
+    form = CafeForm(obj=cafe_to_update)
+
+    if form.validate_on_submit():
+        cafe_to_update.name = form.name.data
+        cafe_to_update.map_url = form.map_url.data
+        cafe_to_update.img_url = form.img_url.data
+        cafe_to_update.location = form.location.data
+        cafe_to_update.has_sockets = form.has_sockets.data
+        cafe_to_update.has_toilet = form.has_toilet.data
+        cafe_to_update.has_wifi = form.has_wifi.data
+        cafe_to_update.can_take_calls = form.can_take_calls.data
+        cafe_to_update.seats = form.seats.data
+        cafe_to_update.coffee_price = form.coffee_price.data
+        cafe_to_update.user_id = current_user.id
+
+        try:
+            db.session.commit()
+            flash('Kawiarnia zaktualizowana!', 'success')
+            return redirect(url_for('home'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Błąd podczas aktualizowania: {str(e)}', 'danger')
+    return render_template("update_cafe.html", form=form, cafe=cafe_to_update)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -226,3 +255,5 @@ def logout():
 if __name__ == '__main__':
     app.run(debug=True)
 
+# TODO
+# update cafe

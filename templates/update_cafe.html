@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Edytuj Kawiarnię - Brew & Byte{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit"></i> Edytuj Kawiarnię
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Aktualizujesz informacje o kawiarni: <strong>{{ cafe.name }}</strong>
+                    </p>
+
+                    <form method="POST" action="{{ url_for('update_cafe', cafe_id=cafe.id) }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.location.label(class="form-label") }}
+                            {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""), placeholder="np. Kraków, ul. Floriańska 1") }}
+                            {% if form.location.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.location.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.map_url.label(class="form-label") }}
+                            {{ form.map_url(class="form-control" + (" is-invalid" if form.map_url.errors else ""), placeholder="https://maps.google.com/...") }}
+                            {% if form.map_url.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.map_url.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.img_url.label(class="form-label") }}
+                            {{ form.img_url(class="form-control" + (" is-invalid" if form.img_url.errors else ""), placeholder="https://example.com/image.jpg") }}
+                            {% if form.img_url.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.img_url.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.seats.label(class="form-label") }}
+                                {{ form.seats(class="form-select" + (" is-invalid" if form.seats.errors else "")) }}
+                                {% if form.seats.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.seats.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.coffee_price.label(class="form-label") }}
+                                {{ form.coffee_price(class="form-control" + (" is-invalid" if form.coffee_price.errors else ""), placeholder="np. 12 PLN") }}
+                                {% if form.coffee_price.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.coffee_price.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Udogodnienia</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            {{ form.has_wifi(class="form-check-input") }}
+                                            {{ form.has_wifi.label(class="form-check-label") }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            {{ form.has_sockets(class="form-check-input") }}
+                                            {{ form.has_sockets.label(class="form-check-label") }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            {{ form.has_toilet(class="form-check-input") }}
+                                            {{ form.has_toilet.label(class="form-check-label") }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            {{ form.can_take_calls(class="form-check-input") }}
+                                            {{ form.can_take_calls.label(class="form-check-label") }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Anuluj
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> Zaktualizuj Kawiarnię
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
