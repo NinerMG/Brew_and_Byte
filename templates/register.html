@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Register - Brew & Byte{% endblock %}
+{% block title %}{{ _("Register") }} - Brew & Byte{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -146,8 +146,8 @@
         <div class="register-card">
             <div class="register-header">
                 <i class="bi bi-person-plus-fill"></i>
-                <h2>Create Account</h2>
-                <p>Join our community of cafe enthusiasts</p>
+                <h2>{{ _("Create Account") }}</h2>
+                <p>{{ _("Join our community of cafe enthusiasts") }}</p>
             </div>
             
             {% if form %}
@@ -156,12 +156,12 @@
                 
                 <!-- Name Field -->
                 <div class="mb-3">
-                    <label for="name" class="form-label">Full Name</label>
+                    <label for="name" class="form-label">{{ _("Full Name") }}</label>
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="bi bi-person-fill"></i>
                         </span>
-                        {{ form.name(class="form-control", placeholder="John Doe", id="name") }}
+                        {{ form.name(class="form-control", placeholder=_("John Doe"), id="name") }}
                     </div>
                     {% if form.name.errors %}
                         <div class="text-danger small mt-1">

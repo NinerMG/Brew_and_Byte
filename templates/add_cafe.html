@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Add New Cafe{% endblock %}
+{% block title %}{{ _("Add New Cafe") }}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row">
         <div class="col-md-8 offset-md-2">
-            <h1 class="display-4 mb-4">Add a New Cafe</h1>
+            <h1 class="display-4 mb-4">{{ _("Add a New Cafe") }}</h1>
 
             <form method="POST" action="{{ url_for('add_cafe') }}">
                 {{ form.hidden_tag() }}
@@ -124,7 +124,7 @@
 
                 <!-- Submit Button -->
                 {{ form.submit(class="btn btn-primary btn-lg") }}
-                <a href="{{ url_for('home') }}" class="btn btn-secondary btn-lg">Cancel</a>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary btn-lg">{{ _("Cancel") }}</a>
             </form>
         </div>
     </div>

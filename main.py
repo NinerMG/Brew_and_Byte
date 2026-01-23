@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request,jsonify, url_for, redirect, flash
+from flask import Flask, render_template, request, jsonify, url_for, redirect, flash, session
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String, Boolean
@@ -7,6 +7,7 @@ from wtforms import StringField, SelectField, BooleanField, SubmitField, Passwor
 from wtforms.validators import DataRequired, URL, Email, Length, EqualTo
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from flask_babel import Babel, gettext, lazy_gettext as _l
 
 """
 O projekcie:
@@ -26,6 +27,28 @@ Technologie: Flask, SQLAlchemy, Bootstrap 5, WTForms
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-productio'
+
+# Babel configuration
+app.config['BABEL_DEFAULT_LOCALE'] = 'pl'
+app.config['BABEL_SUPPORTED_LOCALES'] = ['pl', 'en']
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+
+babel = Babel(app)
+
+def get_locale():
+    """Determine the best language to use for the request."""
+    # Try to get language from session
+    if 'language' in session:
+        return session['language']
+    # Otherwise try to guess from browser Accept-Language header
+    return request.accept_languages.best_match(app.config['BABEL_SUPPORTED_LOCALES']) or app.config['BABEL_DEFAULT_LOCALE']
+
+babel.init_app(app, locale_selector=get_locale)
+
+# Make gettext available in templates
+@app.context_processor
+def inject_gettext():
+    return dict(_=gettext)
 
 
 #Flask-Login
@@ -70,39 +93,39 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 class CafeForm(FlaskForm):
-    name = StringField('Cafe Name', validators=[DataRequired()])
-    location = StringField('Location', validators=[DataRequired()])
-    map_url = StringField('Map URL', validators=[DataRequired(), URL()])
-    img_url = StringField('Image URL', validators=[DataRequired(), URL()])
-    seats = SelectField('Number of Seats',
+    name = StringField(_l('Cafe Name'), validators=[DataRequired()])
+    location = StringField(_l('Location'), validators=[DataRequired()])
+    map_url = StringField(_l('Map URL'), validators=[DataRequired(), URL()])
+    img_url = StringField(_l('Image URL'), validators=[DataRequired(), URL()])
+    seats = SelectField(_l('Number of Seats'),
                         choices=[('0-10', '0-10'), ('10-20', '10-20'), ('20-30', '20-30'),
                                  ('30-40', '30-40'), ('40-50', '40-50'), ('50+', '50+')],
                         validators=[DataRequired()])
-    coffee_price = StringField('Coffee Price', validators=[DataRequired()])
-    has_wifi = BooleanField('Has WiFi', default=True)
-    has_sockets = BooleanField('Has Power Sockets', default=True)
-    has_toilet = BooleanField('Has Toilet', default=True)
-    can_take_calls = BooleanField('Can Take Calls', default=False)
-    submit = SubmitField('Zapisz')  # Zmień na uniwersalny tekst
+    coffee_price = StringField(_l('Coffee Price'), validators=[DataRequired()])
+    has_wifi = BooleanField(_l('Has WiFi'), default=True)
+    has_sockets = BooleanField(_l('Has Power Sockets'), default=True)
+    has_toilet = BooleanField(_l('Has Toilet'), default=True)
+    can_take_calls = BooleanField(_l('Can Take Calls'), default=False)
+    submit = SubmitField(_l('Save'))
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember = BooleanField('Remember Me')
-    submit = SubmitField('Login')
+    email = StringField(_l('Email'), validators=[DataRequired(), Email()])
+    password = PasswordField(_l('Password'), validators=[DataRequired()])
+    remember = BooleanField(_l('Remember Me'))
+    submit = SubmitField(_l('Login'))
 
 class RegisterForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[
+    name = StringField(_l('Name'), validators=[DataRequired()])
+    email = StringField(_l('Email'), validators=[DataRequired(), Email()])
+    password = PasswordField(_l('Password'), validators=[
         DataRequired(),
-        Length(min=8, message='Hasło musi mieć minimum 8 znaków')
+        Length(min=8, message=_l('Password must be at least 8 characters'))
     ])
-    confirm_password = PasswordField('Potwierdź hasło', validators=[
+    confirm_password = PasswordField(_l('Confirm Password'), validators=[
         DataRequired(),
-        EqualTo('password', message='Hasła muszą być identyczne')
+        EqualTo('password', message=_l('Passwords must match'))
     ])
-    submit = SubmitField('Zarejestruj się')
+    submit = SubmitField(_l('Register'))
 
 with app.app_context():
     db.create_all()
@@ -250,6 +273,15 @@ def logout():
     logout_user()
     flash('Zostałeś wylogowany', 'info')
     return redirect(url_for('home'))
+
+
+@app.route('/set-language/<language>')
+def set_language(language):
+    """Switch the application language."""
+    if language in app.config['BABEL_SUPPORTED_LOCALES']:
+        session['language'] = language
+        flash(gettext('Language changed successfully!'), 'success')
+    return redirect(request.referrer or url_for('home'))
 
 
 if __name__ == '__main__':

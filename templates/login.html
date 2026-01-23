@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Brew & Byte{% endblock %}
+{% block title %}{{ _("Login") }} - Brew & Byte{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -124,8 +124,8 @@
         <div class="login-card">
             <div class="login-header">
                 <i class="bi bi-cup-hot-fill"></i>
-                <h2>Welcome Back!</h2>
-                <p>Login to discover laptop-friendly cafes</p>
+                <h2>{{ _("Welcome Back!") }}</h2>
+                <p>{{ _("Login to discover laptop-friendly cafes") }}</p>
             </div>
             
             {% if form %}
@@ -134,12 +134,12 @@
                 
                 <!-- Email Field -->
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email Address</label>
+                    <label for="email" class="form-label">{{ _("Email Address") }}</label>
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="bi bi-envelope-fill"></i>
                         </span>
-                        {{ form.email(class="form-control", placeholder="your@email.com", id="email") }}
+                        {{ form.email(class="form-control", placeholder=_("your@email.com"), id="email") }}
                     </div>
                     {% if form.email.errors %}
                         <div class="text-danger small mt-1">
@@ -152,12 +152,12 @@
                 
                 <!-- Password Field -->
                 <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
+                    <label for="password" class="form-label">{{ _("Password") }}</label>
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="bi bi-lock-fill"></i>
                         </span>
-                        {{ form.password(class="form-control", placeholder="Enter your password", id="password") }}
+                        {{ form.password(class="form-control", placeholder=_("Enter your password"), id="password") }}
                     </div>
                     {% if form.password.errors %}
                         <div class="text-danger small mt-1">
@@ -172,7 +172,7 @@
                 <div class="mb-3 form-check">
                     {{ form.remember(class="form-check-input", id="remember") }}
                     <label class="form-check-label" for="remember">
-                        Remember me
+                        {{ _("Remember me") }}
                     </label>
                 </div>
                 
@@ -184,17 +184,17 @@
             {% else %}
             <!-- TYMCZASOWA WERSJA - Zastąp pełną implementacją -->
             <div class="alert alert-info">
-                <h5><i class="bi bi-info-circle"></i> Funkcja logowania nie jest jeszcze zaimplementowana</h5>
-                <p class="mb-0">Zobacz plik <code>IMPLEMENTATION_STEPS.py</code> aby zaimplementować pełną funkcjonalność logowania.</p>
+                <h5><i class="bi bi-info-circle"></i> {{ _("Login feature not yet implemented") }}</h5>
+                <p class="mb-0">{{ _("See IMPLEMENTATION_STEPS.py file to implement full login functionality.") }}</p>
             </div>
             {% endif %}
             
             <div class="divider">
-                <span>OR</span>
+                <span>{{ _("OR") }}</span>
             </div>
             
             <div class="register-link">
-                <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+                <p>{{ _("Don't have an account?") }} <a href="{{ url_for('register') }}">{{ _("Register here") }}</a></p>
             </div>
         </div>
     </div>
