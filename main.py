@@ -314,7 +314,6 @@ def update_cafe(cafe_id):
             flash(f'Błąd podczas aktualizowania: {str(e)}', 'danger')
     return render_template("update_cafe.html", form=form, cafe=cafe_to_update)
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Logowanie użytkownika z weryfikacją hasła.
@@ -338,7 +337,6 @@ def login():
 
 
     return render_template('login.html', form=form)
-
 
 @app.route('/logout')
 @login_required
