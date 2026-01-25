@@ -37,3 +37,33 @@ def test_delete_cafe(client, auth_user, sample_cafe):
 
     assert response.status_code == 200
     assert "Kawiarnia usunięta!" in response.get_data(as_text=True)
+
+# Błędne URL-e: Sprawdź, czy formularz CafeForm
+# odrzuci map_url, który nie zaczyna się od http lub https.
+
+# Edycja kawiarni (update_cafe): Sprawdź, czy po zmianie
+# nazwy kawiarni w formularzu i wysłaniu POST, nazwa w bazie danych faktycznie się zmieniła.
+
+# Brak kawiarni: Co się stanie, gdy użytkownik spróbuje wejść na /update/cafe/9999?
+# Powinieneś otrzymać błąd 404.
+
+#Zmiana języka: Przetestuj endpoint /set-language/en. Sprawdź, czy po zmianie
+# w sesji znajduje się 'language': 'en' i czy napisy na stronie (np. w formularzu)
+# faktycznie się zmieniają.
+
+#Test unikalności nazwy: W modelu Cafe masz unique=True.
+# Co się stanie, gdy spróbujesz dodać kawiarnię o nazwie, która już istnieje?
+# Powinieneś sprawdzić, czy aplikacja obsłuży IntegrityError lub czy walidator WTForms to wyłapie.
+
+# Test pustych pól: Spróbuj wysłać formularz dodawania z samymi spacjami lub pustymi polami,
+# które są oznaczone jako DataRequired().
+
+# Test formatu obrazka/URL: Co jeśli użytkownik poda w img_url ciąg znaków, który nie jest linkiem?
+# Twoje testy powinny potwierdzić, że walidator URL() działa.
+
+# Test wygaśnięcia sesji: Sprawdź, czy po wejściu na /logout,
+# próba wejścia na /add kończy się przekierowaniem do logowania.
+
+# Test transakcyjności: Sprawdź, czy jeśli podczas dodawania kawiarni wystąpi błąd bazy danych
+# (np. symulowany db.session.rollback()), kawiarnia na pewno nie zostanie zapisana.
+
