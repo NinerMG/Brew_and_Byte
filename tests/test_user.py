@@ -50,17 +50,125 @@ def test_register_user_logout_and_login(client):
     assert response.status_code == 200
     assert user_data.get('name') in response.get_data(as_text=True)
 
-#Nieudane logowanie: Sprawdź, czy wpisanie poprawnego maila,
-# ale złego hasła, nie wpuszcza użytkownika i wyświetla odpowiedni flash.
+def test_login_with_wrong_password(client):
+    user_data = {
+        "name": "Nowy User",
+        "email": "duplicate@example.com",
+        "password": "password123",
+        "confirm_password": "password123"
+    }
+    client.post('/register', data=user_data, follow_redirects=True)
+    client.get('/logout', follow_redirects=True)
 
-# Rejestracja duplikatu: Spróbuj zarejestrować drugiego użytkownika na ten sam adres email
-# (powinien wyskoczyć błąd "Ten adres email jest już zarejestrowany").
+    response = client.post('/login', data={
+        'email': user_data.get('email'),
+        'password': "password12"
+    },follow_redirects=True)
 
-# Dostęp bez logowania: Sprawdź, czy próba wejścia na /add lub /update/cafe/1
-# przez niezalogowanego użytkownika przekierowuje do strony logowania.
+    assert response.status_code == 200
+    assert 'Nieprawidłowy email, lub hasło. Spróbuj ponownie' in response.data.decode('utf-8')
 
-#Długość hasła: Przetestuj, czy rejestracja zostanie odrzucona,
-# jeśli hasło ma mniej niż 8 znaków (zgodnie z Twoim walidatorem Length(min=8)).
+def test_login_with_wrong_email(client):
+    user_data = {
+        "name": "Nowy User",
+        "email": "duplicate@example.com",
+        "password": "password123",
+        "confirm_password": "password123"
+    }
+    client.post('/register', data=user_data, follow_redirects=True)
+    client.get('/logout', follow_redirects=True)
 
-#Zgodność haseł: Sprawdź, czy formularz rejestracji wyłapie sytuację,
-# gdy password i confirm_password są różne.
+    response = client.post('/login', data={
+        'email': 'test@test.com',
+        'password': "password123"
+    }, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert 'Nieprawidłowy email, lub hasło. Spróbuj ponownie' in response.data.decode('utf-8')
+
+def test_redirect_to_login_page_on_add(client):
+    response = client.get('/add', follow_redirects=False)
+    assert response.status_code == 302
+    assert response.location.startswith('/login')
+
+def test_redirect_to_login_page_on_update(client, sample_cafe):
+    response =  client.get(f'/update/cafe/{sample_cafe.id}', follow_redirects=False)
+    assert response.status_code == 302
+    assert response.location.startswith('/login')
+
+def test_too_short_password(client):
+    user_data = {
+        "name": "Nowy User",
+        "email": "duplicate@example.com",
+        "password": "pass",
+        "confirm_password": "pass"
+    }
+    response = client.post('/register', data=user_data, follow_redirects=True)
+    assert response.status_code == 200
+    assert 'Hasło musi mieć minimum 8 znaków' in response.data.decode('utf-8')
+
+def test_password_and_confirm_password_different(client):
+    user_data = {
+        "name": "Nowy User",
+        "email": "duplicate@example.com",
+        "password": "password321",
+        "confirm_password": "password123"
+    }
+    response = client.post('/register', data=user_data, follow_redirects=True)
+    assert response.status_code == 200
+    assert 'Hasła muszą być identyczne' in response.data.decode('utf-8')
+
+def test_register_without_email(client):
+    user_data = {
+        "name": "Nowy User",
+        # "email": "test@example.com",
+        "password": "password123",
+        "confirm_password": "password123"
+    }
+    response = client.post('/register', data=user_data, follow_redirects=True)
+    assert response.status_code == 200
+    assert 'To pole jest wymagane' in response.data.decode('utf-8')
+
+def test_register_with_invalid_email(client):
+    user_data = {
+        "name": "Nowy User",
+        "email": "nieprawidlowy-email",
+        "password": "password123",
+        "confirm_password": "password123"
+    }
+    response = client.post('/register', data=user_data, follow_redirects=True)
+    assert response.status_code == 200
+    assert 'Nieprawidłowy adres e-mail.' in response.data.decode('utf-8')
+
+def test_register_without_name(client):
+    user_data = {
+        #"name": "Nowy User",
+        "email": "test@example.com",
+        "password": "password123",
+        "confirm_password": "password123"
+    }
+    response = client.post('/register', data=user_data, follow_redirects=True)
+    assert response.status_code == 200
+    assert 'To pole jest wymagane' in response.data.decode('utf-8')
+
+def test_register_without_password(client):
+    user_data = {
+        "name": "Nowy User",
+        "email": "test@example.com",
+        #"password": "password123",
+        "confirm_password": "password123"
+    }
+    response = client.post('/register', data=user_data, follow_redirects=True)
+    assert response.status_code == 200
+    assert 'To pole jest wymagane' in response.data.decode('utf-8')
+
+def test_register_without_confirm_password(client):
+    user_data = {
+        "name": "Nowy User",
+        "email": "test@example.com",
+        "password": "password123",
+        #"confirm_password": "password123"
+    }
+    response = client.post('/register', data=user_data, follow_redirects=True)
+    assert response.status_code == 200
+    assert 'To pole jest wymagane' in response.data.decode('utf-8')

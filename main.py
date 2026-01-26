@@ -263,6 +263,9 @@ def delete_cafe(cafe_id):
         Przekierowanie do strony głównej
     """
     cafe_to_delete = db.session.get(Cafe, cafe_id)
+    if cafe_to_delete.user_id != current_user.id:
+        flash('Nie masz uprawnień!', 'danger')
+        return redirect(url_for('home'))
     if cafe_to_delete:
         try:
             db.session.delete(cafe_to_delete)
@@ -275,7 +278,6 @@ def delete_cafe(cafe_id):
         flash('Nie znaleziono kawiarni!', 'danger')
 
     return redirect(url_for('home'))
-
 
 @app.route('/update/cafe/<int:cafe_id>', methods=['GET', 'POST'])
 @login_required
@@ -350,7 +352,6 @@ def logout():
     flash('Zostałeś wylogowany', 'info')
     return redirect(url_for('home'))
 
-
 @app.route('/set-language/<language>')
 def set_language(language):
     """Zmiana języka aplikacji (PL/EN).
@@ -365,7 +366,6 @@ def set_language(language):
         session['language'] = language
         flash(gettext('Language changed successfully!'), 'success')
     return redirect(request.referrer or url_for('home'))
-
 
 if __name__ == '__main__':
     app.run(debug=True)
