@@ -1,10 +1,13 @@
+import re
+from xml.dom import ValidationErr
+
 from flask import Flask, render_template, request, jsonify, url_for, redirect, flash, session
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String, Boolean
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, BooleanField, SubmitField, PasswordField, Form
-from wtforms.validators import DataRequired, URL, Email, Length, EqualTo
+from wtforms.validators import DataRequired, URL, Email, Length, EqualTo, ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from flask_babel import Babel, gettext, lazy_gettext as _l
@@ -56,6 +59,12 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = "Musisz być zalogowany, aby uzyskać dostęp do tej strony."
 login_manager.login_message_category = 'info'
+
+
+def no_html_tags(form, field):
+    """Custom validator - odrzuca HTML tags"""
+    if re.search(r'<[^>]*>', field.data):
+        raise ValidationError(_l('Pole nie może zawierać znaczników HTML'))
 
 class Base(DeclarativeBase):
     pass
@@ -148,11 +157,13 @@ class LoginForm(FlaskForm):
 
 class RegisterForm(FlaskForm):
     """Formularz rejestracji nowego użytkownika."""
-    name = StringField(_l('Name'), validators=[DataRequired()])
+    name = StringField(_l('Name'), validators=[DataRequired(),
+                                               Length(min=2, max=100, message='Name must be between 2 and 100 characters'),
+                                               no_html_tags])
     email = StringField(_l('Email'), validators=[DataRequired(), Email()])
     password = PasswordField(_l('Password'), validators=[
         DataRequired(),
-        Length(min=8, message=_l('Password must be at least 8 characters'))
+        Length(min=8, max=200, message=_l('Password must be at least 8 characters and no more than 200 characters'))
     ])
     confirm_password = PasswordField(_l('Confirm Password'), validators=[
         DataRequired(),

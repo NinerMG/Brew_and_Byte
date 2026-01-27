@@ -38,6 +38,7 @@ def test_delete_cafe(client, auth_user, sample_cafe):
     assert response.status_code == 200
     assert "Kawiarnia usunięta!" in response.get_data(as_text=True)
 
+
 # Błędne URL-e: Sprawdź, czy formularz CafeForm
 # odrzuci map_url, który nie zaczyna się od http lub https.
 
