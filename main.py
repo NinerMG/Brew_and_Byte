@@ -187,7 +187,8 @@ def register():
 
     form = RegisterForm()
     if form.validate_on_submit():
-        existing_user = db.session.query(User).filter_by(email=form.email.data).first()
+        email_lower = form.email.data.lower()
+        existing_user = db.session.query(User).filter_by(email=email_lower).first()
         if existing_user:
             flash('Ten adres email jest już zarejestrowany. Użyj innego', 'danger')
             return redirect(url_for('register'))
@@ -198,7 +199,7 @@ def register():
             salt_length=8,
         )
         new_user = User(
-            email=form.email.data,
+            email=email_lower,
             password=hashed_password,
             name=form.name.data
         )
@@ -339,7 +340,8 @@ def login():
         return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = db.session.query(User).filter_by(email=form.email.data).first()
+        email_lower = form.email.data.lower()
+        user = db.session.query(User).filter_by(email=email_lower).first()
 
         if user and check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
