@@ -172,3 +172,30 @@ def test_register_without_confirm_password(client):
     response = client.post('/register', data=user_data, follow_redirects=True)
     assert response.status_code == 200
     assert 'To pole jest wymagane' in response.data.decode('utf-8')
+
+def test_login_without_email(client):
+    response = client.post('/login', data={
+        #'email': 'test@test.com',
+        'password': "password123"
+    }, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert 'To pole jest wymagane' in response.data.decode('utf-8')
+
+def test_login_with_invalid_email(client):
+    response = client.post('/login', data={
+         'email': 'nieprawidlowy-email',
+        'password': "password123"
+    }, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert 'Nieprawidłowy adres e-mail.' in response.data.decode('utf-8')
+
+def test_login_without_password(client):
+    response = client.post('/login', data={
+        'email': 'test@test.com',
+        #'password': "password123"
+    }, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert 'To pole jest wymagane' in response.data.decode('utf-8')
