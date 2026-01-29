@@ -1,5 +1,5 @@
 import pytest
-from main import User, db
+from main import User,Cafe, db
 
 def test_home_page(client):
     response = client.get('/')
@@ -237,9 +237,6 @@ def test_register_with_special_characters_in_name(client):
     assert 'Pole nie może zawierać znaczników HTML' in response.data.decode('utf-8')
 
 def test_register_with_empty_strings(client):
-    """Test: Puste stringi zamiast braku pól."""
-    # TODO: POST z name='', email='', password=''
-    # TODO: Assert błędy walidacji
     user_data = {
         "name": '',
         "email": "",
@@ -303,7 +300,6 @@ def test_multiple_failed_login_attempts(client, auth_user):
         assert "Nieprawidłowy email, lub hasło" in response.data.decode('utf-8')
 
 def test_user_stays_logged_in_after_redirect(client, auth_user):
-
     client.post('/login', data={
         'email': 'test@example.com',
         'password': 'password123'
@@ -318,182 +314,74 @@ def test_user_stays_logged_in_after_redirect(client, auth_user):
     response = client.get('/add', follow_redirects=True)
     assert response.status_code == 200
     assert b'add' in response.request.path.encode() or 'Dodaj' in response.data.decode('utf-8')
-    # NIE przekierował do /login - znaczy że jest zalogowany
 
     # 3. Powrót na stronę główną
     response = client.get('/', follow_redirects=True)
     assert response.status_code == 200
     assert 'Tester' in response.data.decode('utf-8')
 
-
-
-
 def test_logout_clears_session(client, auth_user):
-    """Test: Wylogowanie czyści sesję."""
-    # TODO: Zaloguj
-    # TODO: GET /logout
-    # TODO: Spróbuj GET /add
-    # TODO: Assert przekierowanie do login
-    pass
+    client.post('/login', data={
+        'email': 'test@example.com',
+        'password': 'password123'
+    }, follow_redirects=True)
 
+    client.get('/logout', follow_redirects=True)
+    response = client.get('/add', follow_redirects=False)
+    assert response.status_code == 302
+    assert '/login' in response.location
 
 def test_access_protected_route_after_logout(client, auth_user):
-    """Test: Brak dostępu do chronionych stron po wylogowaniu."""
-    # TODO: Zaloguj, dodaj kawiarnię, wyloguj
-    # TODO: Spróbuj GET /add
-    # TODO: Assert redirect do /login
-    pass
+    client.post('/login', data={
+        'email': 'test@example.com',
+        'password': 'password123'
+    }, follow_redirects=True)
 
+    client.get('/logout', follow_redirects=True)
+    response = client.get('/add', follow_redirects=True)
+    assert response.status_code == 200
+    assert b'Login' in response.data or 'login' in response.request.path
 
 def test_logged_in_user_cannot_access_register(client, auth_user):
-    """Test: Zalogowany użytkownik nie może wejść na /register."""
-    # TODO: Zaloguj
-    # TODO: GET /register
-    # TODO: Assert redirect do home
-    pass
+    client.post('/login', data={
+        'email': 'test@example.com',
+        'password': 'password123'
+    }, follow_redirects=True)
 
+    response = client.get('/register', follow_redirects=False)
+    assert response.status_code == 302
+    assert response.location == '/'
 
 def test_logged_in_user_cannot_access_login(client, auth_user):
-    """Test: Zalogowany użytkownik nie może wejść na /login."""
-    # TODO: Zaloguj
-    # TODO: GET /login
-    # TODO: Assert redirect do home
-    pass
+    client.post('/login', data={
+        'email': 'test@example.com',
+        'password': 'password123'
+    }, follow_redirects=True)
 
+    response = client.get('/login', follow_redirects=False)
+    assert response.status_code == 302
+    assert response.location == '/'
 
-# ==========================================
-# USER MODEL & DATABASE
-# ==========================================
+def test_user_password_is_hashed(client, app):
+    client.post(
+        '/register', data={
+            "name": "Nowy User",
+            "email": "nowy@example.com",
+            "password": "password123",
+            "confirm_password": "password123"
+        }, follow_redirects=True
+    )
+    with app.app_context():
+        user = User.query.filter_by(email="nowy@example.com").first()
 
-def test_user_password_is_hashed(client):
-    """Test: Hasło jest zahashowane w bazie, nie plaintext."""
-    # TODO: Zarejestruj użytkownika z password='testpass123'
-    # TODO: Pobierz użytkownika z bazy
-    # TODO: Assert że user.password != 'testpass123'
-    # TODO: Assert że user.password.startswith('pbkdf2:sha256')
-    pass
+        assert user.password != "password123"
+        assert user.password.startswith('pbkdf2:sha256')
 
+def test_user_relationship_with_cafes(auth_user, sample_cafe, app):
+    with app.app_context():
+        user = User.query.get(auth_user.id)
+        cafe = Cafe.query.get(sample_cafe.id)
 
-def test_user_model_string_representation(auth_user):
-    """Test: __repr__ lub __str__ modelu User."""
-    # TODO: user_str = str(auth_user)
-    # TODO: Assert że zawiera email lub name
-    pass
-
-
-def test_user_relationship_with_cafes(auth_user, sample_cafe):
-    """Test: Relacja User ↔ Cafe działa."""
-    # TODO: Assert że auth_user.cafes zawiera sample_cafe
-    # TODO: Assert że sample_cafe.owner == auth_user
-    pass
-
-
-def test_duplicate_email_database_constraint():
-    """Test: Constraint unique na email działa na poziomie bazy."""
-    # TODO: Dodaj 2 userów z tym samym emailem bezpośrednio do bazy
-    # TODO: Assert IntegrityError
-    pass
-
-
-# ==========================================
-# PRZEKIEROWANIA I FLOW
-# ==========================================
-
-def test_redirect_to_login_on_delete(client):
-    """Test: /delete wymaga logowania."""
-    # TODO: GET /delete/1 bez logowania
-    # TODO: Assert redirect do /login
-    pass
-
-
-def test_redirect_after_login_goes_to_home(client, auth_user):
-    """Test: Po zalogowaniu przekierowanie do home."""
-    # TODO: POST /login
-    # TODO: Assert że jesteś na home (/)
-    pass
-
-
-def test_redirect_after_register_goes_to_home(client):
-    """Test: Po rejestracji przekierowanie do home."""
-    # TODO: POST /register
-    # TODO: Assert redirect do home
-    pass
-
-
-def test_next_parameter_after_login(client, auth_user):
-    """Test: Parametr ?next=/add przekierowuje po loginie."""
-    # TODO: GET /add (niezalogowany) → redirect do /login?next=/add
-    # TODO: Zaloguj się
-    # TODO: Assert że jesteś na /add
-    pass
-
-
-# ==========================================
-# FLASH MESSAGES
-# ==========================================
-
-def test_flash_message_on_successful_register(client):
-    """Test: Flash message po rejestracji."""
-    # TODO: POST /register
-    # TODO: Assert 'Twoje konto zostało utworzone' in response
-    pass
-
-
-def test_flash_message_on_successful_login(client, auth_user):
-    """Test: Flash message po logowaniu."""
-    # TODO: POST /login
-    # TODO: Assert 'Witaj ponownie' in response
-    pass
-
-
-def test_flash_message_on_logout(client, auth_user):
-    """Test: Flash message po wylogowaniu."""
-    # TODO: Zaloguj, wyloguj
-    # TODO: Assert 'Zostałeś wylogowany' in response
-    pass
-
-
-def test_flash_message_on_duplicate_email(client):
-    """Test: Flash message przy duplikacie email."""
-    # TODO: Zarejestruj raz
-    # TODO: Spróbuj drugi raz
-    # TODO: Assert 'Ten adres email jest już zarejestrowany' in response
-    pass
-
-
-# ==========================================
-# SECURITY
-# ==========================================
-
-def test_xss_in_user_name(client):
-    """Test: XSS protection w imieniu użytkownika."""
-    # TODO: Zarejestruj z name='<script>alert("XSS")</script>'
-    # TODO: Zaloguj i sprawdź wyświetlanie
-    # TODO: Assert że <script> jest escaped (Jinja2 chroni)
-    pass
-
-
-def test_password_hash_different_for_same_password(client):
-    """Test: Ten sam password ma różne hashe (salt działa)."""
-    # TODO: Zarejestruj user1 z password='test123'
-    # TODO: Zarejestruj user2 z password='test123'
-    # TODO: Assert że user1.password != user2.password (różne sale)
-    pass
-
-
-# ==========================================
-# EDGE CASES
-# ==========================================
-
-def test_register_with_unicode_emoji_name(client):
-    """Test: Emoji w imieniu użytkownika."""
-    # TODO: POST z name='User 😀🎉'
-    # TODO: Assert że działa poprawnie
-    pass
-
-
-def test_very_long_email(client):
-    """Test: Bardzo długi email."""
-    # TODO: POST z email='a'*100 + '@example.com'
-    # TODO: Assert błąd walidacji (max 100 znaków)
-    pass
+        assert cafe in user.cafes
+        assert cafe.owner == user
+        assert cafe.user_id == user.id

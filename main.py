@@ -304,6 +304,10 @@ def update_cafe(cafe_id):
         lub renderowanie formularza edycji
     """
     cafe_to_update = Cafe.query.get_or_404(cafe_id)
+    if cafe_to_update.user_id != current_user.id:
+        flash('Nie masz uprawnień!', 'danger')
+        return redirect(url_for('home'))
+
     form = CafeForm(obj=cafe_to_update)
 
     if form.validate_on_submit():
