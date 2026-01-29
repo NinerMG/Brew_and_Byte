@@ -293,31 +293,39 @@ def test_login_case_sensitive_email(client):
     assert response.status_code == 200
     assert "Test User" in response.data.decode('utf-8')
 
-def test_login_with_remember_me(client, auth_user):
-    """Test: Checkbox 'Remember Me' działa."""
-    # TODO: POST /login z remember=True
-    # TODO: Assert że sesja jest 'permanent' (sprawdź cookie)
-    pass
-
-
 def test_multiple_failed_login_attempts(client, auth_user):
-    """Test: Wiele błędnych prób logowania."""
-    # TODO: 5x POST z błędnym hasłem
-    # TODO: Assert że komunikat błędu jest każdorazowo
-    # TODO: (Opcjonalnie: rate limiting test)
-    pass
-
-
-# ==========================================
-# SESJA UŻYTKOWNIKA
-# ==========================================
+    for _ in range(5):
+        response = client.post('/login', data={
+            "email": auth_user.email,
+            "password": "pass",
+        })
+        assert response.status_code == 200
+        assert "Nieprawidłowy email, lub hasło" in response.data.decode('utf-8')
 
 def test_user_stays_logged_in_after_redirect(client, auth_user):
-    """Test: Użytkownik pozostaje zalogowany po przekierowaniu."""
-    # TODO: Zaloguj
-    # TODO: GET różne strony (/add, /)
-    # TODO: Assert że current_user jest nadal zalogowany
-    pass
+
+    client.post('/login', data={
+        'email': 'test@example.com',
+        'password': 'password123'
+    }, follow_redirects=True)
+
+    # 1. Strona główna
+    response = client.get('/', follow_redirects=True)
+    assert response.status_code == 200
+    assert 'Tester' in response.data.decode('utf-8')  # Imię użytkownika widoczne
+
+    # 2. Strona dodawania kawiarni (wymaga logowania)
+    response = client.get('/add', follow_redirects=True)
+    assert response.status_code == 200
+    assert b'add' in response.request.path.encode() or 'Dodaj' in response.data.decode('utf-8')
+    # NIE przekierował do /login - znaczy że jest zalogowany
+
+    # 3. Powrót na stronę główną
+    response = client.get('/', follow_redirects=True)
+    assert response.status_code == 200
+    assert 'Tester' in response.data.decode('utf-8')
+
+
 
 
 def test_logout_clears_session(client, auth_user):
