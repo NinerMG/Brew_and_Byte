@@ -1,5 +1,5 @@
 import pytest
-from main import User,Cafe, db
+from main import Cafe, db
 
 def test_login_add_cafe(client, auth_user):
     """Sprawdza, że zalogowany użytkownik może dodać nową kawiarnię."""
@@ -200,7 +200,6 @@ def test_update_cafe_without_name(client, auth_user, sample_cafe):
     assert response.status_code == 200
     assert 'This field is required' in response.data.decode('utf-8') or 'To pole jest wymagane' in response.data.decode('utf-8')
 
-
 def test_update_cafe_with_invalid_url(client, auth_user, sample_cafe):
     """Sprawdza, że nieprawidłowy URL przy edycji jest wykrywany przez walidację."""
     client.post('/login', data={
@@ -219,7 +218,6 @@ def test_update_cafe_with_invalid_url(client, auth_user, sample_cafe):
     
     assert response.status_code == 200
     assert 'Invalid URL' in response.data.decode('utf-8') or 'Nieprawidłowy URL' in response.data.decode('utf-8')
-
 
 def test_update_cafe_redirects_to_home(client, auth_user, sample_cafe):
     """Sprawdza, że po udanej edycji następuje przekierowanie do strony głównej."""
@@ -240,7 +238,6 @@ def test_update_cafe_redirects_to_home(client, auth_user, sample_cafe):
     assert response.status_code == 302
     assert response.location == '/'
 
-
 def test_update_nonexistent_cafe_returns_404(client, auth_user):
     """Sprawdza, że próba edycji nieistniejącej kawiarni zwraca błąd 404."""
     client.post('/login', data={
@@ -250,11 +247,6 @@ def test_update_nonexistent_cafe_returns_404(client, auth_user):
     
     response = client.get('/update/cafe/99999')
     assert response.status_code == 404
-
-
-# ==========================================
-# CRUD - DELETE (Usuwanie)
-# ==========================================
 
 def test_delete_cafe_removes_from_database(client, auth_user, sample_cafe):
     """Sprawdza, że usunięcie kawiarni faktycznie usuwa ją z bazy danych."""
@@ -271,7 +263,6 @@ def test_delete_cafe_removes_from_database(client, auth_user, sample_cafe):
     deleted_cafe = db.session.get(Cafe, cafe_id)
     assert deleted_cafe is None
 
-
 def test_delete_cafe_redirects_to_home(client, auth_user, sample_cafe):
     """Sprawdza, że po usunięciu następuje przekierowanie do strony głównej."""
     client.post('/login', data={
@@ -283,7 +274,6 @@ def test_delete_cafe_redirects_to_home(client, auth_user, sample_cafe):
     
     assert response.status_code == 302
     assert response.location == '/'
-
 
 def test_delete_nonexistent_cafe(client, auth_user):
     """Sprawdza, że próba usunięcia nieistniejącej kawiarni zwraca błąd 404."""
@@ -298,7 +288,6 @@ def test_delete_nonexistent_cafe(client, auth_user):
     except AttributeError:
         assert True
 
-
 def test_delete_cafe_shows_flash_message(client, auth_user, sample_cafe):
     """Sprawdza, że po usunięciu kawiarni wyświetlany jest komunikat flash."""
     client.post('/login', data={
@@ -310,11 +299,6 @@ def test_delete_cafe_shows_flash_message(client, auth_user, sample_cafe):
     
     assert response.status_code == 200
     assert 'Kawiarnia usunięta!' in response.data.decode('utf-8')
-
-
-# ==========================================
-# CRUD - ADD (Dodawanie) - Walidacja
-# ==========================================
 
 def test_add_cafe_without_login(client):
     """Sprawdza, że próba dodania kawiarni bez zalogowania przekierowuje do logowania."""
@@ -329,7 +313,6 @@ def test_add_cafe_without_login(client):
     
     assert response.status_code == 302
     assert '/login' in response.location
-
 
 def test_add_cafe_without_name(client, auth_user):
     """Sprawdza, że walidacja wymaga podania nazwy kawiarni."""
@@ -350,7 +333,6 @@ def test_add_cafe_without_name(client, auth_user):
     assert response.status_code == 200
     assert 'This field is required' in response.data.decode('utf-8') or 'To pole jest wymagane' in response.data.decode('utf-8')
 
-
 def test_add_cafe_without_location(client, auth_user):
     """Sprawdza, że walidacja wymaga podania lokalizacji kawiarni."""
     client.post('/login', data={
@@ -369,7 +351,6 @@ def test_add_cafe_without_location(client, auth_user):
     
     assert response.status_code == 200
     assert 'This field is required' in response.data.decode('utf-8') or 'To pole jest wymagane' in response.data.decode('utf-8')
-
 
 def test_add_cafe_without_map_url(client, auth_user):
     """Sprawdza, że walidacja wymaga podania linku do mapy."""
@@ -390,7 +371,6 @@ def test_add_cafe_without_map_url(client, auth_user):
     assert response.status_code == 200
     assert 'This field is required' in response.data.decode('utf-8') or 'To pole jest wymagane' in response.data.decode('utf-8')
 
-
 def test_add_cafe_without_img_url(client, auth_user):
     """Sprawdza, że walidacja wymaga podania linku do obrazka."""
     client.post('/login', data={
@@ -409,7 +389,6 @@ def test_add_cafe_without_img_url(client, auth_user):
     
     assert response.status_code == 200
     assert 'This field is required' in response.data.decode('utf-8') or 'To pole jest wymagane' in response.data.decode('utf-8')
-
 
 def test_add_cafe_without_seats(client, auth_user):
     """Sprawdza, że walidacja wymaga wybrania liczby miejsc."""
@@ -430,7 +409,6 @@ def test_add_cafe_without_seats(client, auth_user):
     assert response.status_code == 200
     assert 'To pole jest wymagane' in response.data.decode('utf-8') or 'This field is required' in response.data.decode('utf-8') or 'Not a valid choice' in response.data.decode('utf-8')
 
-
 def test_add_cafe_without_coffee_price(client, auth_user):
     """Sprawdza, że walidacja wymaga podania ceny kawy."""
     client.post('/login', data={
@@ -449,7 +427,6 @@ def test_add_cafe_without_coffee_price(client, auth_user):
     
     assert response.status_code == 200
     assert 'This field is required' in response.data.decode('utf-8') or 'To pole jest wymagane' in response.data.decode('utf-8')
-
 
 def test_add_cafe_with_invalid_map_url(client, auth_user):
     """Sprawdza, że nieprawidłowy format URL mapy jest wykrywany przez walidację."""
@@ -470,7 +447,6 @@ def test_add_cafe_with_invalid_map_url(client, auth_user):
     assert response.status_code == 200
     assert 'Invalid URL' in response.data.decode('utf-8') or 'Nieprawidłowy URL' in response.data.decode('utf-8')
 
-
 def test_add_cafe_with_invalid_img_url(client, auth_user):
     """Sprawdza, że nieprawidłowy format URL obrazka jest wykrywany przez walidację."""
     client.post('/login', data={
@@ -490,7 +466,6 @@ def test_add_cafe_with_invalid_img_url(client, auth_user):
     assert response.status_code == 200
     assert 'Invalid URL' in response.data.decode('utf-8') or 'Nieprawidłowy URL' in response.data.decode('utf-8')
 
-
 def test_add_cafe_with_duplicate_name(client, auth_user, sample_cafe):
     """Sprawdza zachowanie aplikacji przy próbie dodania kawiarni z istniejącą nazwą."""
     client.post('/login', data={
@@ -508,7 +483,6 @@ def test_add_cafe_with_duplicate_name(client, auth_user, sample_cafe):
     }, follow_redirects=True)
     
     assert response.status_code in [200, 302]
-
 
 def test_add_cafe_displays_in_list(client, auth_user):
     """Sprawdza, że nowo dodana kawiarnia pojawia się na liście kawiarni."""
@@ -533,7 +507,6 @@ def test_add_cafe_displays_in_list(client, auth_user):
     assert 'Nowa Kawiarnia XYZ' in response.data.decode('utf-8')
     assert 'Poznań' in response.data.decode('utf-8')
 
-
 def test_cafe_belongs_to_user(client, auth_user, app):
     """Sprawdza, że nowo utworzona kawiarnia ma przypisany user_id właściciela."""
     client.post('/login', data={
@@ -554,11 +527,6 @@ def test_cafe_belongs_to_user(client, auth_user, app):
         cafe = Cafe.query.filter_by(name="Kawiarnia Właściciela").first()
         assert cafe is not None
         assert cafe.user_id == auth_user.id
-
-
-# ==========================================
-# WYŚWIETLANIE (Home page)
-# ==========================================
 
 def test_home_displays_all_cafes(client, auth_user, app):
     """Sprawdza, że strona główna wyświetla wszystkie kawiarnie z bazy."""
@@ -585,7 +553,6 @@ def test_home_displays_all_cafes(client, auth_user, app):
     for cafe_name in cafes:
         assert cafe_name in html
 
-
 def test_home_displays_cafe_details(client, sample_cafe):
     """Sprawdza, że szczegóły kawiarni są widoczne na stronie głównej."""
     response = client.get('/')
@@ -596,7 +563,6 @@ def test_home_displays_cafe_details(client, sample_cafe):
     assert sample_cafe.location in html
     assert sample_cafe.coffee_price in html
 
-
 def test_home_with_no_cafes(client):
     """Sprawdza, że strona główna poprawnie wyświetla się gdy brak kawiarni w bazie."""
     response = client.get('/')
@@ -604,7 +570,6 @@ def test_home_with_no_cafes(client):
     
     assert response.status_code == 200
     assert 'Brak kawiarni w bazie danych!' in html or '0 Znaleziono Kawiarni' in html
-
 
 def test_home_displays_multiple_cafes(client, auth_user):
     """Sprawdza, że wiele kawiarni wyświetla się poprawnie na stronie głównej."""
@@ -630,7 +595,6 @@ def test_home_displays_multiple_cafes(client, auth_user):
     for i in range(1, 6):
         assert f"Kawiarnia {i}" in html
 
-
 def test_cafe_boolean_fields_display_correctly(client, sample_cafe):
     """Sprawdza, że pola boolean (WiFi, gniazdka) są poprawnie wyświetlane."""
     response = client.get('/')
@@ -640,16 +604,10 @@ def test_cafe_boolean_fields_display_correctly(client, sample_cafe):
     assert 'data-wifi' in html or 'WiFi' in html
     assert 'data-sockets' in html or 'gniazdka' in html.lower()
 
-
-# ==========================================
-# CAFE MODEL
-# ==========================================
-
 def test_cafe_model_string_representation(sample_cafe):
     """Sprawdza, że reprezentacja tekstowa modelu Cafe jest poprawna."""
     cafe_str = str(sample_cafe)
     assert sample_cafe.name in cafe_str or "Cafe" in cafe_str
-
 
 def test_cafe_unique_name_constraint(app, auth_user):
     """Sprawdza zachowanie aplikacji przy próbie dodania kawiarni z duplikowaną nazwą na poziomie bazy."""
@@ -692,16 +650,10 @@ def test_cafe_unique_name_constraint(app, auth_user):
             db.session.rollback()
             assert True
 
-
 def test_cafe_foreign_key_relationship(auth_user, sample_cafe):
     """Sprawdza, że relacja foreign key między Cafe a User działa poprawnie."""
     assert sample_cafe.user_id == auth_user.id
     assert sample_cafe.user_id == auth_user.id
-
-
-# ==========================================
-# EDGE CASES
-# ==========================================
 
 def test_add_cafe_with_empty_strings(client, auth_user):
     """Sprawdza, że puste stringi w polach obowiązkowych są wykrywane przez walidację."""
@@ -722,7 +674,6 @@ def test_add_cafe_with_empty_strings(client, auth_user):
     assert response.status_code == 200
     assert 'This field is required' in response.data.decode('utf-8') or 'To pole jest wymagane' in response.data.decode('utf-8')
 
-
 def test_add_cafe_with_whitespace_only(client, auth_user):
     """Sprawdza zachowanie aplikacji gdy w polach są tylko białe znaki."""
     client.post('/login', data={
@@ -740,7 +691,6 @@ def test_add_cafe_with_whitespace_only(client, auth_user):
     }, follow_redirects=True)
     
     assert response.status_code in [200, 302]
-
 
 def test_very_long_cafe_name(client, auth_user):
     """Sprawdza zachowanie aplikacji przy bardzo długiej nazwie kawiarni (>250 znaków)."""
@@ -760,7 +710,6 @@ def test_very_long_cafe_name(client, auth_user):
     }, follow_redirects=True)
     
     assert response.status_code in [200, 302, 500]
-
 
 def test_unicode_characters_in_cafe_name(client, auth_user):
     """Sprawdza, że nazwa kawiarni z emoji i znakami Unicode działa poprawnie."""
@@ -782,11 +731,6 @@ def test_unicode_characters_in_cafe_name(client, auth_user):
     
     response = client.get('/')
     assert 'Kawiarnia ☕🎉 Café' in response.data.decode('utf-8') or response.status_code == 200
-
-
-# ==========================================
-# DATABASE ERRORS
-# ==========================================
 
 def test_database_rollback_on_error(client, auth_user, monkeypatch, app):
     """Sprawdza, że przy błędzie bazy danych następuje rollback transakcji."""
