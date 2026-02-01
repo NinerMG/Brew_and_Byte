@@ -1,20 +1,82 @@
 import pytest
+import os
+import shutil
 from main import app as flask_app, db, User, Cafe
 from werkzeug.security import generate_password_hash
 
+@pytest.fixture(scope='session', autouse=True)
+def backup_production_db():
+    """
+    BEZPIECZEŃSTWO: Tworzy kopię zapasową produkcyjnej bazy przed testami.
+    Jeśli coś pójdzie źle, możesz przywrócić bazę z pliku .backup
+    """
+    prod_db = os.path.join(os.path.dirname(__file__), '..', 'instance', 'cafes.db')
+    backup_db = os.path.join(os.path.dirname(__file__), '..', 'instance', 'cafes.db.backup')
+    
+    if os.path.exists(prod_db):
+        shutil.copy2(prod_db, backup_db)
+        print(f"\n🛡️  Kopia zapasowa produkcyjnej bazy: {backup_db}")
+    
+    yield
+
+
 @pytest.fixture
 def app():
-    flask_app.config.update({
-        "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
-        "WTF_CSRF_ENABLED": False,
-    })
+    """
+    Fixture aplikacji - używa TYLKO testowej bazy danych.
+    
+    ROZWIĄZANIE: Modyfikacja wewnętrznego słownika db.engines.
+    Flask-SQLAlchemy 3.x ma db.engine jako read-only property, ale db.engines jest dict.
+    """
+    # Ścieżka do testowej bazy
+    test_db_path = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), '..', 'instance', 'test_cafes.db'
+    ))
 
+    original_uri = flask_app.config.get('SQLALCHEMY_DATABASE_URI')
+    
+    # Ustaw konfigurację testową
+    flask_app.config['TESTING'] = True
+    flask_app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{test_db_path}"
+    flask_app.config['WTF_CSRF_ENABLED'] = False
+    
     with flask_app.app_context():
+        original_engine = db.engine
+
+        db.session.remove()
+
+        from sqlalchemy import create_engine
+        new_engine = create_engine(f"sqlite:///{test_db_path}")
+
+        db.engines[None] = new_engine
+
+        db.metadata.bind = new_engine
+
         db.create_all()
+
+        actual_db = db.engine.url.database
+        print(f"\n✅ Używana baza: {actual_db}")
+
+        assert 'test_cafes.db' in str(actual_db), f"BŁĄD! Używana baza: {actual_db}"
+        
         yield flask_app
+
         db.session.remove()
         db.drop_all()
+
+        new_engine.dispose()
+
+        db.engines[None] = original_engine
+        db.metadata.bind = original_engine
+
+    flask_app.config['SQLALCHEMY_DATABASE_URI'] = original_uri
+    flask_app.config['TESTING'] = False
+
+    if os.path.exists(test_db_path):
+        try:
+            os.remove(test_db_path)
+        except:
+            pass
 
 @pytest.fixture
 def client(app):
