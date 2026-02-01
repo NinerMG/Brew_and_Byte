@@ -1,5 +1,5 @@
 import re
-from xml.dom import ValidationErr
+
 
 from flask import Flask, render_template, request, jsonify, url_for, redirect, flash, session
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -275,19 +275,21 @@ def delete_cafe(cafe_id):
         Przekierowanie do strony głównej
     """
     cafe_to_delete = db.session.get(Cafe, cafe_id)
+    if not cafe_to_delete:
+        flash('Nie znaleziono kawiarni!', 'danger')
+        return redirect(url_for('home'))
+    
     if cafe_to_delete.user_id != current_user.id:
         flash('Nie masz uprawnień!', 'danger')
         return redirect(url_for('home'))
-    if cafe_to_delete:
-        try:
-            db.session.delete(cafe_to_delete)
-            db.session.commit()
-            flash('Kawiarnia usunięta!', 'success')
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Błąd podczas usuwania: {str(e)}', 'danger')
-    else:
-        flash('Nie znaleziono kawiarni!', 'danger')
+    
+    try:
+        db.session.delete(cafe_to_delete)
+        db.session.commit()
+        flash('Kawiarnia usunięta!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Błąd podczas usuwania: {str(e)}', 'danger')
 
     return redirect(url_for('home'))
 

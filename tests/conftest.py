@@ -30,7 +30,6 @@ def auth_user(app):
         db.session.refresh(user)
         return user
 
-
 @pytest.fixture
 def sample_cafe(app, auth_user):
     """Tworzy testową kawiarnię w bazie danych."""
@@ -51,3 +50,59 @@ def sample_cafe(app, auth_user):
     db.session.commit()
 
     return cafe
+
+@pytest.fixture
+def login_user(client, email, password):
+    """Helper: Loguje użytkownika."""
+    return client.post('/login', data={
+        'email': email,
+        'password': password
+    }, follow_redirects=True)
+
+@pytest.fixture
+def logout_user(client):
+    """Helper: Wylogowuje użytkownika."""
+    return client.get('/logout', follow_redirects=True)
+
+@pytest.fixture
+def register_user(client, name, email, password):
+    """Helper: Rejestruje nowego użytkownika."""
+    return client.post('/register', data={
+        'name': name,
+        'email': email,
+        'password': password,
+        'confirm_password': password
+    }, follow_redirects=True)
+
+@pytest.fixture
+def add_cafe(client, cafe_data):
+    """Helper: Dodaje kawiarnię."""
+    default_data = {
+        "name": "Test Cafe",
+        "location": "Test City",
+        "map_url": "https://maps.google.com/test",
+        "img_url": "https://images.com/test.jpg",
+        "seats": "10-20",
+        "coffee_price": "15 PLN",
+        "has_wifi": True,
+        "has_sockets": True,
+        "has_toilet": True,
+        "can_take_calls": False
+    }
+    default_data.update(cafe_data)
+    return client.post('/add', data=default_data, follow_redirects=True)
+
+@pytest.fixture
+def update_cafe(client, cafe_id, cafe_data):
+    """Helper: Aktualizuje kawiarnię."""
+    return client.post(f'/update/cafe/{cafe_id}', data=cafe_data, follow_redirects=True)
+
+@pytest.fixture
+def delete_cafe(client, cafe_id):
+    """Helper: Usuwa kawiarnię."""
+    return client.get(f'/delete/{cafe_id}', follow_redirects=True)
+
+@pytest.fixture
+def set_language(client, lang_code):
+    """Helper: Ustawia język aplikacji."""
+    return client.get(f'/set-language/{lang_code}', follow_redirects=True)

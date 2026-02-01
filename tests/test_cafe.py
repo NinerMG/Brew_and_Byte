@@ -276,17 +276,15 @@ def test_delete_cafe_redirects_to_home(client, auth_user, sample_cafe):
     assert response.location == '/'
 
 def test_delete_nonexistent_cafe(client, auth_user):
-    """Sprawdza, że próba usunięcia nieistniejącej kawiarni zwraca błąd 404."""
+    """Sprawdza, że próba usunięcia nieistniejącej kawiarni przekierowuje z komunikatem błędu."""
     client.post('/login', data={
         "email": "test@example.com",
         "password": "password123"
     }, follow_redirects=True)
     
-    try:
-        response = client.get('/delete/99999')
-        assert response.status_code == 404
-    except AttributeError:
-        assert True
+    response = client.get('/delete/99999', follow_redirects=True)
+    assert response.status_code == 200
+    assert "Nie znaleziono kawiarni!" in response.data.decode('utf-8')
 
 def test_delete_cafe_shows_flash_message(client, auth_user, sample_cafe):
     """Sprawdza, że po usunięciu kawiarni wyświetlany jest komunikat flash."""
