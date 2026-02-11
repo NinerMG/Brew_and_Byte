@@ -4,6 +4,8 @@
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-3.0.3-green.svg)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## ✨ Funkcjonalności
@@ -48,6 +50,11 @@
 - **pytest** - framework do testów
 - **pytest-flask** - integracja testów z Flask
 
+### DevOps & CI/CD
+- **Docker** - konteneryzacja aplikacji
+- **Docker Compose** - orkiestracja kontenerów
+- **GitHub Actions** - automatyczne testy i build
+
 ## 📦 Instalacja
 
 ### Wymagania
@@ -58,10 +65,35 @@
 
 ### Tryb deweloperski
 ```bash
-python run.py
+python main.py
 ```
 
 Aplikacja będzie dostępna pod adresem: `http://127.0.0.1:5000`
+
+### 🐳 Uruchomienie z Dockerem
+
+#### Pojedynczy kontener
+```bash
+# Zbuduj obraz Docker
+docker build -t brew-and-byte .
+
+# Uruchom kontener
+docker run -p 5000:5000 brew-and-byte
+```
+
+#### Docker Compose (rekomendowane)
+```bash
+# Uruchom aplikację
+docker-compose up
+
+# Uruchom w tle
+docker-compose up -d
+
+# Zatrzymaj aplikację
+docker-compose down
+```
+
+Aplikacja będzie dostępna pod adresem: `http://localhost:5000`
 
 
 
@@ -69,38 +101,32 @@ Aplikacja będzie dostępna pod adresem: `http://127.0.0.1:5000`
 
 ```
 Brew_and_Byte/
-├── run.py                  # Entry point aplikacji
-├── config.py               # Konfiguracja (Development/Testing/Production)
-├── requirements.txt        # Zależności projektu
-├── babel.cfg              # Konfiguracja Babel (tłumaczenia)
-├── messages.pot           # Szablon tłumaczeń
-├── app/                   # Pakiet główny aplikacji
-│   ├── __init__.py        # Application Factory
-│   ├── models.py          # Modele SQLAlchemy (User, Cafe)
-│   ├── forms.py           # Formularze WTForms
-│   ├── extensions.py      # Inicjalizacja rozszerzeń Flask
-│   └── routes/            # Blueprinty z endpointami
-│       ├── __init__.py
-│       ├── main.py        # Strona główna, zmiana języka
-│       ├── auth.py        # Rejestracja, logowanie, wylogowanie
-│       └── cafe.py        # CRUD dla kawiarni
-├── instance/              # Baza danych SQLite
+├── main.py                # Entry point aplikacji
+├── requirements.txt       # Zależności projektu
+├── Dockerfile             # Konfiguracja obrazu Docker
+├── docker-compose.yml     
+├── babel.cfg             # Konfiguracja Babel (tłumaczenia)
+├── messages.pot          # Szablon tłumaczeń
+├── .github/              # GitHub Actions
+│   └── workflows/
+│       └── github-actions.yml  # CI/CD pipeline
+├── instance/             # Baza danych SQLite
 │   └── cafes.db
-├── static/                # Pliki statyczne
+├── static/               # Pliki statyczne
 │   └── style.css
-├── templates/             # Szablony HTML
+├── templates/            # Szablony HTML
 │   ├── base.html
 │   ├── index.html
 │   ├── add_cafe.html
 │   ├── update_cafe.html
 │   ├── login.html
 │   └── register.html
-├── translations/          # Tłumaczenia (PL/EN)
+├── translations/         # Tłumaczenia (PL/EN)
 │   ├── en/
 │   │   └── LC_MESSAGES/
 │   └── pl/
 │       └── LC_MESSAGES/
-└── tests/                 # Testy jednostkowe i integracyjne
+└── tests/                # Testy jednostkowe i integracyjne
     ├── conftest.py
     ├── test_cafe.py
     ├── test_user.py
@@ -165,6 +191,30 @@ Użytkownicy mogą zmieniać język za pomocą przełącznika w interfejsie lub 
 - user_id: int (FK)
 ```
 
+## 🔄 CI/CD i Deployment
+
+### GitHub Actions
+Projekt wykorzystuje GitHub Actions do automatyzacji procesów CI/CD:
+
+**Pipeline zawiera:**
+- ✅ **Automatyczne testy** - uruchamiane przy każdym push i pull request
+- 🐍 **Setup Python 3.10** - konfiguracja środowiska
+- 📦 **Instalacja zależności** - automatyczna instalacja pakietów z requirements.txt
+- 🧪 **Wykonanie testów** - pytest z pełnym coverage
+- 🐳 **Build obrazu Docker** - weryfikacja poprawności Dockerfile
+
+**Triggery:**
+- Push do branchy `main` lub `master`
+- Pull requesty do branchy `main` lub `master`
+
+### Docker
+Aplikacja jest w pełni skontenryzowana:
+
+**Dockerfile:**
+- Bazuje na `python:3.10-slim`
+- Automatyczna instalacja zależności
+- Eksponuje port 5000
+- Uruchamia aplikację przez `main.py`
 
 ## 👨‍💻 Autor
 
