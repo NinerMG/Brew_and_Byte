@@ -1,9 +1,11 @@
 name: GitHub Actions for Python App Brew and Byte
+
 on:
   push:
     branches: ["main", "master"]
   pull_request:
     branches: ["main", "master"]
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -13,6 +15,8 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
@@ -25,3 +29,7 @@ jobs:
           pytest
         env:
           PYTHONPATH: .
+
+      - name: Build Docker image
+        run: |
+          docker build -t brew-and-byte:latest .
